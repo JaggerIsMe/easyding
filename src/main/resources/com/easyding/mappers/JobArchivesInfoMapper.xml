@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.easyding.mappers.JobArchivesInfoMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.easyding.entity.po.indeedPo.JobArchivesInfo">
+		<!--任务UUID-->
+		<result column="job_uuid" property="jobUuid"  />
+		<!--任务年代-->
+		<result column="age" property="age"  />
+		<!--任务名-->
+		<result column="job_name" property="jobName"  />
+		<!--总运行时长(H)-->
+		<result column="total_run_time" property="totalRunTime"  />
+		<!--总运行次数-->
+		<result column="total_counts" property="totalCounts"  />
+		<!--总运行成功次数-->
+		<result column="total_success_counts" property="totalSuccessCounts"  />
+		<!--总运行失败次数-->
+		<result column="total_fail_counts" property="totalFailCounts"  />
+	</resultMap>
+
+
+	<!-- 通用查询结果列-->
+	<sql id="base_column_list">
+		 job_uuid,age,job_name,total_run_time,total_counts,
+		 total_success_counts,total_fail_counts
+	</sql>
+
+	<sql id="base_condition_filed">
+		<if test="query.jobUuid != null and query.jobUuid!=''">
+			 and  job_uuid = #{query.jobUuid}
+		</if>
+		<if test="query.age != null and query.age!=''">
+			 and  age = #{query.age}
+		</if>
+		<if test="query.jobName != null and query.jobName!=''">
+			 and  job_name = #{query.jobName}
+		</if>
+		<if test="query.totalRunTime != null">
+			 and  total_run_time = #{query.totalRunTime}
+		</if>
+		<if test="query.totalCounts != null">
+			 and  total_counts = #{query.totalCounts}
+		</if>
+		<if test="query.totalSuccessCounts != null">
+			 and  total_success_counts = #{query.totalSuccessCounts}
+		</if>
+		<if test="query.totalFailCounts != null">
+			 and  total_fail_counts = #{query.totalFailCounts}
+		</if>
+	</sql>
+
+	<!-- 通用查询条件列-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_condition_filed" />
+			<if test="query.jobUuidFuzzy!= null  and query.jobUuidFuzzy!=''">
+				 and  job_uuid like concat('%', #{query.jobUuidFuzzy}, '%')
+			</if>
+			<if test="query.ageFuzzy!= null  and query.ageFuzzy!=''">
+				 and  age like concat('%', #{query.ageFuzzy}, '%')
+			</if>
+			<if test="query.jobNameFuzzy!= null  and query.jobNameFuzzy!=''">
+				 and  job_name like concat('%', #{query.jobNameFuzzy}, '%')
+			</if>
+		</where>
+	</sql>
+
+	<!-- 查询集合-->
+	<select id="selectList" resultMap="base_result_map" >
+		 SELECT <include refid="base_column_list" /> FROM job_archives_info <include refid="query_condition" />
+		 <if test="query.orderBy!=null">
+			 order by ${query.orderBy}
+		 </if>
+		 <if test="query.simplePage!=null">
+			 limit #{query.simplePage.start},#{query.simplePage.end}
+		 </if>
+	</select>
+
+	<!-- 查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer" >
+		 SELECT count(1) FROM job_archives_info <include refid="query_condition" />
+	</select>
+
+	<!-- 插入 （匹配有值的字段）-->
+	<insert id="insert" parameterType="com.easyding.entity.po.indeedPo.JobArchivesInfo">
+		 INSERT INTO job_archives_info
+		 <trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="bean.jobUuid != null">
+				 job_uuid,
+			</if>
+			<if test="bean.age != null">
+				 age,
+			</if>
+			<if test="bean.jobName != null">
+				 job_name,
+			</if>
+			<if test="bean.totalRunTime != null">
+				 total_run_time,
+			</if>
+			<if test="bean.totalCounts != null">
+				 total_counts,
+			</if>
+			<if test="bean.totalSuccessCounts != null">
+				 total_success_counts,
+			</if>
+			<if test="bean.totalFailCounts != null">
+				 total_fail_counts,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="bean.jobUuid!=null">
+				 #{bean.jobUuid},
+			</if>
+			<if test="bean.age!=null">
+				 #{bean.age},
+			</if>
+			<if test="bean.jobName!=null">
+				 #{bean.jobName},
+			</if>
+			<if test="bean.totalRunTime!=null">
+				 #{bean.totalRunTime},
+			</if>
+			<if test="bean.totalCounts!=null">
+				 #{bean.totalCounts},
+			</if>
+			<if test="bean.totalSuccessCounts!=null">
+				 #{bean.totalSuccessCounts},
+			</if>
+			<if test="bean.totalFailCounts!=null">
+				 #{bean.totalFailCounts},
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 插入或者更新 （匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.easyding.entity.po.indeedPo.JobArchivesInfo">
+		 INSERT INTO job_archives_info
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.jobUuid != null">
+				 job_uuid,
+			</if>
+			<if test="bean.age != null">
+				 age,
+			</if>
+			<if test="bean.jobName != null">
+				 job_name,
+			</if>
+			<if test="bean.totalRunTime != null">
+				 total_run_time,
+			</if>
+			<if test="bean.totalCounts != null">
+				 total_counts,
+			</if>
+			<if test="bean.totalSuccessCounts != null">
+				 total_success_counts,
+			</if>
+			<if test="bean.totalFailCounts != null">
+				 total_fail_counts,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.jobUuid!=null">
+				 #{bean.jobUuid},
+			</if>
+			<if test="bean.age!=null">
+				 #{bean.age},
+			</if>
+			<if test="bean.jobName!=null">
+				 #{bean.jobName},
+			</if>
+			<if test="bean.totalRunTime!=null">
+				 #{bean.totalRunTime},
+			</if>
+			<if test="bean.totalCounts!=null">
+				 #{bean.totalCounts},
+			</if>
+			<if test="bean.totalSuccessCounts!=null">
+				 #{bean.totalSuccessCounts},
+			</if>
+			<if test="bean.totalFailCounts!=null">
+				 #{bean.totalFailCounts},
+			</if>
+		 </trim>
+		 on DUPLICATE key update 
+		 <trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.jobUuid!=null">
+				 job_uuid = VALUES(job_uuid),
+			</if>
+			<if test="bean.age!=null">
+				 age = VALUES(age),
+			</if>
+			<if test="bean.jobName!=null">
+				 job_name = VALUES(job_name),
+			</if>
+			<if test="bean.totalRunTime!=null">
+				 total_run_time = VALUES(total_run_time),
+			</if>
+			<if test="bean.totalCounts!=null">
+				 total_counts = VALUES(total_counts),
+			</if>
+			<if test="bean.totalSuccessCounts!=null">
+				 total_success_counts = VALUES(total_success_counts),
+			</if>
+			<if test="bean.totalFailCounts!=null">
+				 total_fail_counts = VALUES(total_fail_counts),
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 添加 （批量插入）-->
+	<insert id="insertBatch" parameterType="com.easyding.entity.po.indeedPo.JobArchivesInfo">
+		 INSERT INTO job_archives_info(
+			 job_uuid,
+			 age,
+			 job_name,
+			 total_run_time,
+			 total_counts,
+			 total_success_counts,
+			 total_fail_counts
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.jobUuid},
+				 #{item.age},
+				 #{item.jobName},
+				 #{item.totalRunTime},
+				 #{item.totalCounts},
+				 #{item.totalSuccessCounts},
+				 #{item.totalFailCounts}
+			 )
+		 </foreach>
+	</insert>
+
+	<!-- 批量新增修改 （批量插入）-->
+	<insert id="insertOrUpdateBatch" parameterType="com.easyding.entity.po.indeedPo.JobArchivesInfo">
+		 INSERT INTO job_archives_info(
+			 job_uuid,
+			 age,
+			 job_name,
+			 total_run_time,
+			 total_counts,
+			 total_success_counts,
+			 total_fail_counts
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.jobUuid},
+				 #{item.age},
+				 #{item.jobName},
+				 #{item.totalRunTime},
+				 #{item.totalCounts},
+				 #{item.totalSuccessCounts},
+				 #{item.totalFailCounts}
+			 )
+		 </foreach>
+			on DUPLICATE key update 
+			job_uuid = VALUES(job_uuid),
+			age = VALUES(age),
+			job_name = VALUES(job_name),
+			total_run_time = VALUES(total_run_time),
+			total_counts = VALUES(total_counts),
+			total_success_counts = VALUES(total_success_counts),
+			total_fail_counts = VALUES(total_fail_counts)
+	</insert>
+
+	<!--多条件修改-->
+	<update id="updateByParam" parameterType="com.easyding.entity.query.JobArchivesInfoQuery">
+		 UPDATE job_archives_info
+ 		 <set> 
+			<if test="bean.jobUuid != null">
+				 job_uuid = #{bean.jobUuid},
+			</if>
+			<if test="bean.age != null">
+				 age = #{bean.age},
+			</if>
+			<if test="bean.jobName != null">
+				 job_name = #{bean.jobName},
+			</if>
+			<if test="bean.totalRunTime != null">
+				 total_run_time = #{bean.totalRunTime},
+			</if>
+			<if test="bean.totalCounts != null">
+				 total_counts = #{bean.totalCounts},
+			</if>
+			<if test="bean.totalSuccessCounts != null">
+				 total_success_counts = #{bean.totalSuccessCounts},
+			</if>
+			<if test="bean.totalFailCounts != null">
+				 total_fail_counts = #{bean.totalFailCounts},
+			</if>
+ 		 </set>
+ 		 <include refid="query_condition" />
+	</update>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		 delete from job_archives_info
+ 		 <include refid="query_condition" />
+	</delete>
+
+	<!-- 根据JobUuidAndAge修改-->
+	<update id="updateByJobUuidAndAge" parameterType="com.easyding.entity.po.indeedPo.JobArchivesInfo">
+		 UPDATE job_archives_info
+ 		 <set> 
+			<if test="bean.jobName != null">
+				 job_name = #{bean.jobName},
+			</if>
+			<if test="bean.totalRunTime != null">
+				 total_run_time = #{bean.totalRunTime},
+			</if>
+			<if test="bean.totalCounts != null">
+				 total_counts = #{bean.totalCounts},
+			</if>
+			<if test="bean.totalSuccessCounts != null">
+				 total_success_counts = #{bean.totalSuccessCounts},
+			</if>
+			<if test="bean.totalFailCounts != null">
+				 total_fail_counts = #{bean.totalFailCounts},
+			</if>
+ 		 </set>
+ 		 where job_uuid=#{jobUuid} and age=#{age}
+	</update>
+
+	<!-- 根据JobUuidAndAge删除-->
+	<delete id="deleteByJobUuidAndAge">
+		delete from job_archives_info where job_uuid=#{jobUuid} and age=#{age}
+	</delete>
+
+	<!-- 根据PrimaryKey获取对象-->
+	<select id="selectByJobUuidAndAge" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from job_archives_info where job_uuid=#{jobUuid} and age=#{age}
+	</select>
+
+</mapper>

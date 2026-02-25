@@ -1,0 +1,611 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.easyding.mappers.AtRobotMessageMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.easyding.entity.po.dingMsgPo.AtRobotMessage">
+		<!--消息ID-->
+		<result column="msg_id" property="msgId"  />
+		<!--发送者userid-->
+		<result column="sender_staff_id" property="senderStaffId"  />
+		<!--加密的被@用户的id-->
+		<result column="at_dingtalk_id" property="atDingtalkId"  />
+		<!--被@用户的userId-->
+		<result column="at_staff_id" property="atStaffId"  />
+		<!--被@的用户unionid-->
+		<result column="at_union_id" property="atUnionId"  />
+		<!--会话id-->
+		<result column="conversation_id" property="conversationId"  />
+		<!--机器人编码-->
+		<result column="robot_code" property="robotCode"  />
+		<!--加密的机器人ID-->
+		<result column="chatbot_user_id" property="chatbotUserId"  />
+		<!--加密的发送者ID-->
+		<result column="sender_id" property="senderId"  />
+		<!--1：单聊  2：群聊-->
+		<result column="conversation_type" property="conversationType"  />
+		<!--群聊时才有的会话标题-->
+		<result column="conversation_title" property="conversationTitle"  />
+		<!--消息的时间戳，单位毫秒-->
+		<result column="create_at" property="createAt"  />
+		<!--消息类型，文本text、语音audio、图片picture、文件file、视频file、富文本richText-->
+		<result column="msg_type" property="msgType"  />
+		<!--原消息请求体JSON-->
+		<result column="msg_json" property="msgJson"  />
+		<!--0：未消费，1：已消费-->
+		<result column="consume_flag" property="consumeFlag"  />
+	</resultMap>
+
+
+	<!-- 通用查询结果列-->
+	<sql id="base_column_list">
+		 msg_id,sender_staff_id,at_dingtalk_id,at_staff_id,at_union_id,
+		 conversation_id,robot_code,chatbot_user_id,sender_id,conversation_type,
+		 conversation_title,create_at,msg_type,msg_json,consume_flag
+		 
+	</sql>
+
+	<sql id="base_condition_filed">
+		<if test="query.msgId != null and query.msgId!=''">
+			 and  msg_id = #{query.msgId}
+		</if>
+		<if test="query.senderStaffId != null and query.senderStaffId!=''">
+			 and  sender_staff_id = #{query.senderStaffId}
+		</if>
+		<if test="query.atDingtalkId != null and query.atDingtalkId!=''">
+			 and  at_dingtalk_id = #{query.atDingtalkId}
+		</if>
+		<if test="query.atStaffId != null and query.atStaffId!=''">
+			 and  at_staff_id = #{query.atStaffId}
+		</if>
+		<if test="query.atUnionId != null and query.atUnionId!=''">
+			 and  at_union_id = #{query.atUnionId}
+		</if>
+		<if test="query.conversationId != null and query.conversationId!=''">
+			 and  conversation_id = #{query.conversationId}
+		</if>
+		<if test="query.robotCode != null and query.robotCode!=''">
+			 and  robot_code = #{query.robotCode}
+		</if>
+		<if test="query.chatbotUserId != null and query.chatbotUserId!=''">
+			 and  chatbot_user_id = #{query.chatbotUserId}
+		</if>
+		<if test="query.senderId != null and query.senderId!=''">
+			 and  sender_id = #{query.senderId}
+		</if>
+		<if test="query.conversationType != null">
+			 and  conversation_type = #{query.conversationType}
+		</if>
+		<if test="query.conversationTitle != null and query.conversationTitle!=''">
+			 and  conversation_title = #{query.conversationTitle}
+		</if>
+		<if test="query.createAt != null">
+			 and  create_at = #{query.createAt}
+		</if>
+		<if test="query.msgType != null and query.msgType!=''">
+			 and  msg_type = #{query.msgType}
+		</if>
+		<if test="query.msgJson != null and query.msgJson!=''">
+			 and  msg_json = #{query.msgJson}
+		</if>
+		<if test="query.consumeFlag != null">
+			 and  consume_flag = #{query.consumeFlag}
+		</if>
+	</sql>
+
+	<!-- 通用查询条件列-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_condition_filed" />
+			<if test="query.msgIdFuzzy!= null  and query.msgIdFuzzy!=''">
+				 and  msg_id like concat('%', #{query.msgIdFuzzy}, '%')
+			</if>
+			<if test="query.senderStaffIdFuzzy!= null  and query.senderStaffIdFuzzy!=''">
+				 and  sender_staff_id like concat('%', #{query.senderStaffIdFuzzy}, '%')
+			</if>
+			<if test="query.atDingtalkIdFuzzy!= null  and query.atDingtalkIdFuzzy!=''">
+				 and  at_dingtalk_id like concat('%', #{query.atDingtalkIdFuzzy}, '%')
+			</if>
+			<if test="query.atStaffIdFuzzy!= null  and query.atStaffIdFuzzy!=''">
+				 and  at_staff_id like concat('%', #{query.atStaffIdFuzzy}, '%')
+			</if>
+			<if test="query.atUnionIdFuzzy!= null  and query.atUnionIdFuzzy!=''">
+				 and  at_union_id like concat('%', #{query.atUnionIdFuzzy}, '%')
+			</if>
+			<if test="query.conversationIdFuzzy!= null  and query.conversationIdFuzzy!=''">
+				 and  conversation_id like concat('%', #{query.conversationIdFuzzy}, '%')
+			</if>
+			<if test="query.robotCodeFuzzy!= null  and query.robotCodeFuzzy!=''">
+				 and  robot_code like concat('%', #{query.robotCodeFuzzy}, '%')
+			</if>
+			<if test="query.chatbotUserIdFuzzy!= null  and query.chatbotUserIdFuzzy!=''">
+				 and  chatbot_user_id like concat('%', #{query.chatbotUserIdFuzzy}, '%')
+			</if>
+			<if test="query.senderIdFuzzy!= null  and query.senderIdFuzzy!=''">
+				 and  sender_id like concat('%', #{query.senderIdFuzzy}, '%')
+			</if>
+			<if test="query.conversationTitleFuzzy!= null  and query.conversationTitleFuzzy!=''">
+				 and  conversation_title like concat('%', #{query.conversationTitleFuzzy}, '%')
+			</if>
+			<if test="query.msgTypeFuzzy!= null  and query.msgTypeFuzzy!=''">
+				 and  msg_type like concat('%', #{query.msgTypeFuzzy}, '%')
+			</if>
+			<if test="query.msgJsonFuzzy!= null  and query.msgJsonFuzzy!=''">
+				 and  msg_json like concat('%', #{query.msgJsonFuzzy}, '%')
+			</if>
+		</where>
+	</sql>
+
+	<!-- 查询集合-->
+	<select id="selectList" resultMap="base_result_map" >
+		 SELECT <include refid="base_column_list" /> FROM at_robot_message <include refid="query_condition" />
+		 <if test="query.orderBy!=null">
+			 order by ${query.orderBy}
+		 </if>
+		 <if test="query.simplePage!=null">
+			 limit #{query.simplePage.start},#{query.simplePage.end}
+		 </if>
+	</select>
+
+	<!-- 查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer" >
+		 SELECT count(1) FROM at_robot_message <include refid="query_condition" />
+	</select>
+
+	<!-- 插入 （匹配有值的字段）-->
+	<insert id="insert" parameterType="com.easyding.entity.po.dingMsgPo.AtRobotMessage">
+		 INSERT INTO at_robot_message
+		 <trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="bean.msgId != null">
+				 msg_id,
+			</if>
+			<if test="bean.senderStaffId != null">
+				 sender_staff_id,
+			</if>
+			<if test="bean.atDingtalkId != null">
+				 at_dingtalk_id,
+			</if>
+			<if test="bean.atStaffId != null">
+				 at_staff_id,
+			</if>
+			<if test="bean.atUnionId != null">
+				 at_union_id,
+			</if>
+			<if test="bean.conversationId != null">
+				 conversation_id,
+			</if>
+			<if test="bean.robotCode != null">
+				 robot_code,
+			</if>
+			<if test="bean.chatbotUserId != null">
+				 chatbot_user_id,
+			</if>
+			<if test="bean.senderId != null">
+				 sender_id,
+			</if>
+			<if test="bean.conversationType != null">
+				 conversation_type,
+			</if>
+			<if test="bean.conversationTitle != null">
+				 conversation_title,
+			</if>
+			<if test="bean.createAt != null">
+				 create_at,
+			</if>
+			<if test="bean.msgType != null">
+				 msg_type,
+			</if>
+			<if test="bean.msgJson != null">
+				 msg_json,
+			</if>
+			<if test="bean.consumeFlag != null">
+				 consume_flag,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="bean.msgId!=null">
+				 #{bean.msgId},
+			</if>
+			<if test="bean.senderStaffId!=null">
+				 #{bean.senderStaffId},
+			</if>
+			<if test="bean.atDingtalkId!=null">
+				 #{bean.atDingtalkId},
+			</if>
+			<if test="bean.atStaffId!=null">
+				 #{bean.atStaffId},
+			</if>
+			<if test="bean.atUnionId!=null">
+				 #{bean.atUnionId},
+			</if>
+			<if test="bean.conversationId!=null">
+				 #{bean.conversationId},
+			</if>
+			<if test="bean.robotCode!=null">
+				 #{bean.robotCode},
+			</if>
+			<if test="bean.chatbotUserId!=null">
+				 #{bean.chatbotUserId},
+			</if>
+			<if test="bean.senderId!=null">
+				 #{bean.senderId},
+			</if>
+			<if test="bean.conversationType!=null">
+				 #{bean.conversationType},
+			</if>
+			<if test="bean.conversationTitle!=null">
+				 #{bean.conversationTitle},
+			</if>
+			<if test="bean.createAt!=null">
+				 #{bean.createAt},
+			</if>
+			<if test="bean.msgType!=null">
+				 #{bean.msgType},
+			</if>
+			<if test="bean.msgJson!=null">
+				 #{bean.msgJson},
+			</if>
+			<if test="bean.consumeFlag!=null">
+				 #{bean.consumeFlag},
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 插入或者更新 （匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.easyding.entity.po.dingMsgPo.AtRobotMessage">
+		 INSERT INTO at_robot_message
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.msgId != null">
+				 msg_id,
+			</if>
+			<if test="bean.senderStaffId != null">
+				 sender_staff_id,
+			</if>
+			<if test="bean.atDingtalkId != null">
+				 at_dingtalk_id,
+			</if>
+			<if test="bean.atStaffId != null">
+				 at_staff_id,
+			</if>
+			<if test="bean.atUnionId != null">
+				 at_union_id,
+			</if>
+			<if test="bean.conversationId != null">
+				 conversation_id,
+			</if>
+			<if test="bean.robotCode != null">
+				 robot_code,
+			</if>
+			<if test="bean.chatbotUserId != null">
+				 chatbot_user_id,
+			</if>
+			<if test="bean.senderId != null">
+				 sender_id,
+			</if>
+			<if test="bean.conversationType != null">
+				 conversation_type,
+			</if>
+			<if test="bean.conversationTitle != null">
+				 conversation_title,
+			</if>
+			<if test="bean.createAt != null">
+				 create_at,
+			</if>
+			<if test="bean.msgType != null">
+				 msg_type,
+			</if>
+			<if test="bean.msgJson != null">
+				 msg_json,
+			</if>
+			<if test="bean.consumeFlag != null">
+				 consume_flag,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.msgId!=null">
+				 #{bean.msgId},
+			</if>
+			<if test="bean.senderStaffId!=null">
+				 #{bean.senderStaffId},
+			</if>
+			<if test="bean.atDingtalkId!=null">
+				 #{bean.atDingtalkId},
+			</if>
+			<if test="bean.atStaffId!=null">
+				 #{bean.atStaffId},
+			</if>
+			<if test="bean.atUnionId!=null">
+				 #{bean.atUnionId},
+			</if>
+			<if test="bean.conversationId!=null">
+				 #{bean.conversationId},
+			</if>
+			<if test="bean.robotCode!=null">
+				 #{bean.robotCode},
+			</if>
+			<if test="bean.chatbotUserId!=null">
+				 #{bean.chatbotUserId},
+			</if>
+			<if test="bean.senderId!=null">
+				 #{bean.senderId},
+			</if>
+			<if test="bean.conversationType!=null">
+				 #{bean.conversationType},
+			</if>
+			<if test="bean.conversationTitle!=null">
+				 #{bean.conversationTitle},
+			</if>
+			<if test="bean.createAt!=null">
+				 #{bean.createAt},
+			</if>
+			<if test="bean.msgType!=null">
+				 #{bean.msgType},
+			</if>
+			<if test="bean.msgJson!=null">
+				 #{bean.msgJson},
+			</if>
+			<if test="bean.consumeFlag!=null">
+				 #{bean.consumeFlag},
+			</if>
+		 </trim>
+		 on DUPLICATE key update 
+		 <trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.msgId!=null">
+				 msg_id = VALUES(msg_id),
+			</if>
+			<if test="bean.senderStaffId!=null">
+				 sender_staff_id = VALUES(sender_staff_id),
+			</if>
+			<if test="bean.atDingtalkId!=null">
+				 at_dingtalk_id = VALUES(at_dingtalk_id),
+			</if>
+			<if test="bean.atStaffId!=null">
+				 at_staff_id = VALUES(at_staff_id),
+			</if>
+			<if test="bean.atUnionId!=null">
+				 at_union_id = VALUES(at_union_id),
+			</if>
+			<if test="bean.conversationId!=null">
+				 conversation_id = VALUES(conversation_id),
+			</if>
+			<if test="bean.robotCode!=null">
+				 robot_code = VALUES(robot_code),
+			</if>
+			<if test="bean.chatbotUserId!=null">
+				 chatbot_user_id = VALUES(chatbot_user_id),
+			</if>
+			<if test="bean.senderId!=null">
+				 sender_id = VALUES(sender_id),
+			</if>
+			<if test="bean.conversationType!=null">
+				 conversation_type = VALUES(conversation_type),
+			</if>
+			<if test="bean.conversationTitle!=null">
+				 conversation_title = VALUES(conversation_title),
+			</if>
+			<if test="bean.createAt!=null">
+				 create_at = VALUES(create_at),
+			</if>
+			<if test="bean.msgType!=null">
+				 msg_type = VALUES(msg_type),
+			</if>
+			<if test="bean.msgJson!=null">
+				 msg_json = VALUES(msg_json),
+			</if>
+			<if test="bean.consumeFlag!=null">
+				 consume_flag = VALUES(consume_flag),
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 添加 （批量插入）-->
+	<insert id="insertBatch" parameterType="com.easyding.entity.po.dingMsgPo.AtRobotMessage">
+		 INSERT INTO at_robot_message(
+			 msg_id,
+			 sender_staff_id,
+			 at_dingtalk_id,
+			 at_staff_id,
+			 at_union_id,
+			 conversation_id,
+			 robot_code,
+			 chatbot_user_id,
+			 sender_id,
+			 conversation_type,
+			 conversation_title,
+			 create_at,
+			 msg_type,
+			 msg_json,
+			 consume_flag
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.msgId},
+				 #{item.senderStaffId},
+				 #{item.atDingtalkId},
+				 #{item.atStaffId},
+				 #{item.atUnionId},
+				 #{item.conversationId},
+				 #{item.robotCode},
+				 #{item.chatbotUserId},
+				 #{item.senderId},
+				 #{item.conversationType},
+				 #{item.conversationTitle},
+				 #{item.createAt},
+				 #{item.msgType},
+				 #{item.msgJson},
+				 #{item.consumeFlag}
+			 )
+		 </foreach>
+	</insert>
+
+	<!-- 批量新增修改 （批量插入）-->
+	<insert id="insertOrUpdateBatch" parameterType="com.easyding.entity.po.dingMsgPo.AtRobotMessage">
+		 INSERT INTO at_robot_message(
+			 msg_id,
+			 sender_staff_id,
+			 at_dingtalk_id,
+			 at_staff_id,
+			 at_union_id,
+			 conversation_id,
+			 robot_code,
+			 chatbot_user_id,
+			 sender_id,
+			 conversation_type,
+			 conversation_title,
+			 create_at,
+			 msg_type,
+			 msg_json,
+			 consume_flag
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.msgId},
+				 #{item.senderStaffId},
+				 #{item.atDingtalkId},
+				 #{item.atStaffId},
+				 #{item.atUnionId},
+				 #{item.conversationId},
+				 #{item.robotCode},
+				 #{item.chatbotUserId},
+				 #{item.senderId},
+				 #{item.conversationType},
+				 #{item.conversationTitle},
+				 #{item.createAt},
+				 #{item.msgType},
+				 #{item.msgJson},
+				 #{item.consumeFlag}
+			 )
+		 </foreach>
+			on DUPLICATE key update 
+			msg_id = VALUES(msg_id),
+			sender_staff_id = VALUES(sender_staff_id),
+			at_dingtalk_id = VALUES(at_dingtalk_id),
+			at_staff_id = VALUES(at_staff_id),
+			at_union_id = VALUES(at_union_id),
+			conversation_id = VALUES(conversation_id),
+			robot_code = VALUES(robot_code),
+			chatbot_user_id = VALUES(chatbot_user_id),
+			sender_id = VALUES(sender_id),
+			conversation_type = VALUES(conversation_type),
+			conversation_title = VALUES(conversation_title),
+			create_at = VALUES(create_at),
+			msg_type = VALUES(msg_type),
+			msg_json = VALUES(msg_json),
+			consume_flag = VALUES(consume_flag)
+	</insert>
+
+	<!--多条件修改-->
+	<update id="updateByParam" parameterType="com.easyding.entity.query.AtRobotMessageQuery">
+		 UPDATE at_robot_message
+ 		 <set> 
+			<if test="bean.msgId != null">
+				 msg_id = #{bean.msgId},
+			</if>
+			<if test="bean.senderStaffId != null">
+				 sender_staff_id = #{bean.senderStaffId},
+			</if>
+			<if test="bean.atDingtalkId != null">
+				 at_dingtalk_id = #{bean.atDingtalkId},
+			</if>
+			<if test="bean.atStaffId != null">
+				 at_staff_id = #{bean.atStaffId},
+			</if>
+			<if test="bean.atUnionId != null">
+				 at_union_id = #{bean.atUnionId},
+			</if>
+			<if test="bean.conversationId != null">
+				 conversation_id = #{bean.conversationId},
+			</if>
+			<if test="bean.robotCode != null">
+				 robot_code = #{bean.robotCode},
+			</if>
+			<if test="bean.chatbotUserId != null">
+				 chatbot_user_id = #{bean.chatbotUserId},
+			</if>
+			<if test="bean.senderId != null">
+				 sender_id = #{bean.senderId},
+			</if>
+			<if test="bean.conversationType != null">
+				 conversation_type = #{bean.conversationType},
+			</if>
+			<if test="bean.conversationTitle != null">
+				 conversation_title = #{bean.conversationTitle},
+			</if>
+			<if test="bean.createAt != null">
+				 create_at = #{bean.createAt},
+			</if>
+			<if test="bean.msgType != null">
+				 msg_type = #{bean.msgType},
+			</if>
+			<if test="bean.msgJson != null">
+				 msg_json = #{bean.msgJson},
+			</if>
+			<if test="bean.consumeFlag != null">
+				 consume_flag = #{bean.consumeFlag},
+			</if>
+ 		 </set>
+ 		 <include refid="query_condition" />
+	</update>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		 delete from at_robot_message
+ 		 <include refid="query_condition" />
+	</delete>
+
+	<!-- 根据MsgIdAndSenderStaffIdAndAtDingtalkId修改-->
+	<update id="updateByMsgIdAndSenderStaffIdAndAtDingtalkId" parameterType="com.easyding.entity.po.dingMsgPo.AtRobotMessage">
+		 UPDATE at_robot_message
+ 		 <set> 
+			<if test="bean.atStaffId != null">
+				 at_staff_id = #{bean.atStaffId},
+			</if>
+			<if test="bean.atUnionId != null">
+				 at_union_id = #{bean.atUnionId},
+			</if>
+			<if test="bean.conversationId != null">
+				 conversation_id = #{bean.conversationId},
+			</if>
+			<if test="bean.robotCode != null">
+				 robot_code = #{bean.robotCode},
+			</if>
+			<if test="bean.chatbotUserId != null">
+				 chatbot_user_id = #{bean.chatbotUserId},
+			</if>
+			<if test="bean.senderId != null">
+				 sender_id = #{bean.senderId},
+			</if>
+			<if test="bean.conversationType != null">
+				 conversation_type = #{bean.conversationType},
+			</if>
+			<if test="bean.conversationTitle != null">
+				 conversation_title = #{bean.conversationTitle},
+			</if>
+			<if test="bean.createAt != null">
+				 create_at = #{bean.createAt},
+			</if>
+			<if test="bean.msgType != null">
+				 msg_type = #{bean.msgType},
+			</if>
+			<if test="bean.msgJson != null">
+				 msg_json = #{bean.msgJson},
+			</if>
+			<if test="bean.consumeFlag != null">
+				 consume_flag = #{bean.consumeFlag},
+			</if>
+ 		 </set>
+ 		 where msg_id=#{msgId} and sender_staff_id=#{senderStaffId} and at_dingtalk_id=#{atDingtalkId}
+	</update>
+
+	<!-- 根据MsgIdAndSenderStaffIdAndAtDingtalkId删除-->
+	<delete id="deleteByMsgIdAndSenderStaffIdAndAtDingtalkId">
+		delete from at_robot_message where msg_id=#{msgId} and sender_staff_id=#{senderStaffId} and at_dingtalk_id=#{atDingtalkId}
+	</delete>
+
+	<!-- 根据PrimaryKey获取对象-->
+	<select id="selectByMsgIdAndSenderStaffIdAndAtDingtalkId" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from at_robot_message where msg_id=#{msgId} and sender_staff_id=#{senderStaffId} and at_dingtalk_id=#{atDingtalkId}
+	</select>
+
+</mapper>
