@@ -13,8 +13,17 @@ public class AppConfig {
     @Value("${ding.appSecret:}")
     private String dingAppSecret;
 
+    @Value("${ding.robotCode:}")
+    private String dingRobotCode;
+
     @Value("${ding.unionId}")
     private String dingUnionId;
+
+    @Value("${ding.userId}")
+    private String dingUserId;
+
+    @Value("${ding.cardCallbackRouteKey}")
+    private String dingCardCallbackRouteKey;
 
     @Value("${ding.mpBaseId}")
     private String dingMpBaseId;
@@ -42,8 +51,20 @@ public class AppConfig {
         return dingAppSecret;
     }
 
+    public String getDingRobotCode() {
+        return dingRobotCode;
+    }
+
     public String getDingUnionId() {
         return dingUnionId;
+    }
+
+    public String getDingUserId() {
+        return dingUserId;
+    }
+
+    public String getDingCardCallbackRouteKey() {
+        return dingCardCallbackRouteKey;
     }
 
     public String getDingMpBaseId() {

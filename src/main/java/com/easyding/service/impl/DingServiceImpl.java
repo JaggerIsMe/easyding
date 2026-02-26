@@ -1,5 +1,6 @@
 package com.easyding.service.impl;
 
+import com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest;
 import com.aliyun.dingtalknotable_1_0.models.InsertRecordsRequest;
 import com.aliyun.dingtalknotable_1_0.models.ListRecordsResponse;
 import com.aliyun.dingtalknotable_1_0.models.ListRecordsResponseBody;
@@ -10,26 +11,29 @@ import com.aliyun.tea.TeaException;
 import com.aliyun.tea.TeaPair;
 import com.aliyun.teautil.models.RuntimeOptions;
 import com.easyding.config.AppConfig;
+import com.easyding.entity.enums.DateTimePatternEnum;
 import com.easyding.entity.po.dingCardPo.ContentData;
 import com.easyding.entity.po.dingCardPo.DingCardCallbackData;
 import com.easyding.entity.po.dingMsgPo.AtRobotMessage;
 import com.easyding.service.AtRobotMessageService;
 import com.easyding.service.DingService;
+import com.easyding.utils.DateUtil;
 import com.easyding.utils.StringTools;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
 import javax.annotation.Resource;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -75,6 +79,12 @@ public class DingServiceImpl implements DingService {
         return new com.aliyun.dingtalknotable_1_0.Client(config);
     }
 
+    private static String generateOutTrackId(String sendTo) {
+        LocalDateTime sendTime = LocalDateTime.now();
+        Date sendTimeDate = Date.from(sendTime.atZone(ZoneId.systemDefault()).toInstant());
+        return String.format("%s-%s", DateUtil.format(sendTimeDate, DateTimePatternEnum.YYYYMMDDHHMMSS.getPattern()), sendTo);
+    }
+
     /**
      * 获取accessToken
      */
@@ -105,6 +115,137 @@ public class DingServiceImpl implements DingService {
 
         }
         return null;
+
+    }
+
+    /**
+     * 发送卡片(群聊)
+     *
+     * @param openConversationId
+     * @param cardTemplateId
+     * @param cardData
+     */
+    @Override
+    public void sendCard2Group(String openConversationId, String cardTemplateId, CreateAndDeliverRequest.CreateAndDeliverRequestCardData cardData) {
+
+        try {
+
+            com.aliyun.dingtalkcard_1_0.Client client = DingServiceImpl.createCardClient();
+            com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverHeaders createAndDeliverHeaders = new com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverHeaders();
+            createAndDeliverHeaders.xAcsDingtalkAccessToken = this.getAccessToken();
+//            java.util.Map<String, String> imGroupOpenDeliverModelAtUserIds = TeaConverter.buildMap(
+//                    new TeaPair("key", "example_user_name")
+//            );
+//            java.util.Map<String, String> imGroupOpenDeliverModelExtension = TeaConverter.buildMap(
+//                    new TeaPair("key", "example_ext_value")
+//            );
+            com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImGroupOpenDeliverModel imGroupOpenDeliverModel = new com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImGroupOpenDeliverModel()
+//                    .setAtUserIds(imGroupOpenDeliverModelAtUserIds)
+//                    .setRecipients(java.util.Arrays.asList(
+//                            "example_user_id"
+//                    ))
+//                    .setExtension(imGroupOpenDeliverModelExtension)
+                    .setRobotCode(appConfig.getDingRobotCode());
+
+            java.util.Map<String, String> imGroupOpenSpaceModelLastMessageI18n = TeaConverter.buildMap(
+                    new TeaPair("ZH_CN", "RPA机器人卡片消息")
+            );
+            com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImGroupOpenSpaceModelNotification imGroupOpenSpaceModelNotification = new com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImGroupOpenSpaceModelNotification()
+                    .setAlertContent("喵~你收到了一条RPA机器人卡片消息")
+                    .setNotificationOff(false);
+            com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImGroupOpenSpaceModel imGroupOpenSpaceModel = new com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImGroupOpenSpaceModel()
+                    .setSupportForward(false)
+                    .setLastMessageI18n(imGroupOpenSpaceModelLastMessageI18n)
+                    .setNotification(imGroupOpenSpaceModelNotification);
+
+            com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest createAndDeliverRequest = new com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest()
+                    .setCardTemplateId(cardTemplateId)
+                    .setOutTrackId(DingServiceImpl.generateOutTrackId(openConversationId))
+                    .setCallbackType("HTTP")
+                    .setCallbackRouteKey(appConfig.getDingCardCallbackRouteKey())
+                    .setCardData(cardData)
+//                    .setUserIdType(1)
+//                    .setCardAtUserIds(java.util.Arrays.asList())
+//                    .setPrivateData(privateData)
+                    .setImGroupOpenSpaceModel(imGroupOpenSpaceModel)
+                    .setOpenSpaceId(String.format("dtv1.card//im_group.%s", openConversationId))
+                    .setImGroupOpenDeliverModel(imGroupOpenDeliverModel);
+
+            client.createAndDeliverWithOptions(createAndDeliverRequest, createAndDeliverHeaders, new com.aliyun.teautil.models.RuntimeOptions());
+
+        } catch (TeaException err) {
+            if (!com.aliyun.teautil.Common.empty(err.code) && !com.aliyun.teautil.Common.empty(err.message)) {
+                // err 中含有 code 和 message 属性，可帮助开发定位问题
+                logger.error(err.message);
+            }
+        } catch (Exception _err) {
+            TeaException err = new TeaException(_err.getMessage(), _err);
+            if (!com.aliyun.teautil.Common.empty(err.code) && !com.aliyun.teautil.Common.empty(err.message)) {
+                // err 中含有 code 和 message 属性，可帮助开发定位问题
+                logger.error(err.message);
+            }
+        }
+    }
+
+    /**
+     * 发送卡片(私聊用户)
+     *
+     * @param userId
+     * @param cardTemplateId
+     * @param cardData
+     */
+    @Override
+    public void sendCard2User(String userId, String cardTemplateId, CreateAndDeliverRequest.CreateAndDeliverRequestCardData cardData) {
+
+        try {
+
+            com.aliyun.dingtalkcard_1_0.Client client = DingServiceImpl.createCardClient();
+            com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverHeaders createAndDeliverHeaders = new com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverHeaders();
+            createAndDeliverHeaders.xAcsDingtalkAccessToken = this.getAccessToken();
+//            java.util.Map<String, String> imRobotOpenDeliverModelExtension = TeaConverter.buildMap(
+//                    new TeaPair("key", "example_ext_value")
+//            );
+            com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImRobotOpenDeliverModel imRobotOpenDeliverModel = new com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImRobotOpenDeliverModel()
+                    .setSpaceType("IM_ROBOT")
+//                    .setExtension(imRobotOpenDeliverModelExtension)
+                    .setRobotCode(appConfig.getDingRobotCode());
+
+            java.util.Map<String, String> imRobotOpenSpaceModelLastMessageI18n = TeaConverter.buildMap(
+                    new TeaPair("ZH_CN", "RPA机器人卡片消息")
+            );
+            com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImRobotOpenSpaceModelNotification imRobotOpenSpaceModelNotification = new com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImRobotOpenSpaceModelNotification()
+                    .setAlertContent("喵~你收到了一条RPA机器人卡片消息")
+                    .setNotificationOff(false);
+            com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImRobotOpenSpaceModel imRobotOpenSpaceModel = new com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest.CreateAndDeliverRequestImRobotOpenSpaceModel()
+                    .setSupportForward(false)
+                    .setLastMessageI18n(imRobotOpenSpaceModelLastMessageI18n)
+                    .setNotification(imRobotOpenSpaceModelNotification);
+
+            com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest createAndDeliverRequest = new com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest()
+                    .setCardTemplateId(cardTemplateId)
+                    .setOutTrackId(DingServiceImpl.generateOutTrackId(userId))
+                    .setCallbackType("HTTP")
+                    .setCallbackRouteKey(appConfig.getDingCardCallbackRouteKey())
+                    .setCardData(cardData)
+//                    .setPrivateData(privateData)
+                    .setImRobotOpenSpaceModel(imRobotOpenSpaceModel)
+                    .setOpenSpaceId(String.format("dtv1.card//im_robot.%s", userId))
+                    .setImRobotOpenDeliverModel(imRobotOpenDeliverModel);
+
+            client.createAndDeliverWithOptions(createAndDeliverRequest, createAndDeliverHeaders, new com.aliyun.teautil.models.RuntimeOptions());
+
+        } catch (TeaException err) {
+            if (!com.aliyun.teautil.Common.empty(err.code) && !com.aliyun.teautil.Common.empty(err.message)) {
+                // err 中含有 code 和 message 属性，可帮助开发定位问题
+                logger.error(err.message);
+            }
+        } catch (Exception _err) {
+            TeaException err = new TeaException(_err.getMessage(), _err);
+            if (!com.aliyun.teautil.Common.empty(err.code) && !com.aliyun.teautil.Common.empty(err.message)) {
+                // err 中含有 code 和 message 属性，可帮助开发定位问题
+                logger.error(err.message);
+            }
+        }
 
     }
 
@@ -175,7 +316,6 @@ public class DingServiceImpl implements DingService {
 //                commandJobV1(jobUUID, jobParamsStr);
                 commandJobV2(jobUUID, jobParamsStr);
             }
-
 
         } catch (TeaException err) {
             if (!com.aliyun.teautil.Common.empty(err.code) && !com.aliyun.teautil.Common.empty(err.message)) {
@@ -426,7 +566,7 @@ public class DingServiceImpl implements DingService {
                 String msgJson = objectMapper.writeValueAsString(requestBody);
 
                 List<Map<String, Object>> atUsers = requestBody.get("atUsers") == null ? new ArrayList<Map<String, Object>>() : (List<Map<String, Object>>) requestBody.get("atUsers");
-                if (atUsers != null && !atUsers.isEmpty()){
+                if (atUsers != null && !atUsers.isEmpty()) {
                     atUsers.forEach(atUser -> {
                         String atDingtalkId = (String) atUser.get("dingtalkId");
                         String atStaffId = atUser.get("staffId") == null ? null : (String) atUser.get("staffId");

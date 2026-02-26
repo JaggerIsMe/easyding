@@ -1,11 +1,10 @@
 package com.easyding.service;
 
+import com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest;
 import com.aliyun.dingtalknotable_1_0.models.InsertRecordsRequest;
 import com.aliyun.dingtalknotable_1_0.models.ListRecordsResponseBody;
 import com.aliyun.dingtalknotable_1_0.models.UpdateRecordsRequest;
 import com.easyding.entity.po.dingCardPo.DingCardCallbackData;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,24 @@ public interface DingService {
      * 获取accessToken
      */
     String getAccessToken();
+
+    /**
+     * 发送卡片(群聊)
+     *
+     * @param openConversationId
+     * @param cardTemplateId
+     * @param cardData
+     */
+    void sendCard2Group(String openConversationId, String cardTemplateId, CreateAndDeliverRequest.CreateAndDeliverRequestCardData cardData);
+
+    /**
+     * 发送卡片(私聊用户)
+     *
+     * @param userId
+     * @param cardTemplateId
+     * @param cardData
+     */
+    void sendCard2User(String userId, String cardTemplateId, CreateAndDeliverRequest.CreateAndDeliverRequestCardData cardData);
 
     /**
      * 更新卡片
