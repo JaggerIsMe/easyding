@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.easyding.mappers.SmsVerificationCodeMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.easyding.entity.po.otherPo.SmsVerificationCode">
+		<!--毫秒级时间戳作唯一ID-->
+		<result column="u_timestamp_id" property="uTimestampId"  />
+		<!--手机号-->
+		<result column="phone_number" property="phoneNumber"  />
+		<!--平台名称-->
+		<result column="platform_name" property="platformName"  />
+		<!--验证码-->
+		<result column="verification_code" property="verificationCode"  />
+		<!--过期标识，0：未过期，1：已过期-->
+		<result column="expired_flag" property="expiredFlag"  />
+	</resultMap>
+
+
+	<!-- 通用查询结果列-->
+	<sql id="base_column_list">
+		 u_timestamp_id,phone_number,platform_name,verification_code,expired_flag
+		 
+	</sql>
+
+	<sql id="base_condition_filed">
+		<if test="query.uTimestampId != null">
+			 and  u_timestamp_id = #{query.uTimestampId}
+		</if>
+		<if test="query.phoneNumber != null and query.phoneNumber!=''">
+			 and  phone_number = #{query.phoneNumber}
+		</if>
+		<if test="query.platformName != null and query.platformName!=''">
+			 and  platform_name = #{query.platformName}
+		</if>
+		<if test="query.verificationCode != null and query.verificationCode!=''">
+			 and  verification_code = #{query.verificationCode}
+		</if>
+		<if test="query.expiredFlag != null">
+			 and  expired_flag = #{query.expiredFlag}
+		</if>
+	</sql>
+
+	<!-- 通用查询条件列-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_condition_filed" />
+			<if test="query.phoneNumberFuzzy!= null  and query.phoneNumberFuzzy!=''">
+				 and  phone_number like concat('%', #{query.phoneNumberFuzzy}, '%')
+			</if>
+			<if test="query.platformNameFuzzy!= null  and query.platformNameFuzzy!=''">
+				 and  platform_name like concat('%', #{query.platformNameFuzzy}, '%')
+			</if>
+			<if test="query.verificationCodeFuzzy!= null  and query.verificationCodeFuzzy!=''">
+				 and  verification_code like concat('%', #{query.verificationCodeFuzzy}, '%')
+			</if>
+		</where>
+	</sql>
+
+	<!-- 查询集合-->
+	<select id="selectList" resultMap="base_result_map" >
+		 SELECT <include refid="base_column_list" /> FROM sms_verification_code <include refid="query_condition" />
+		 <if test="query.orderBy!=null">
+			 order by ${query.orderBy}
+		 </if>
+		 <if test="query.simplePage!=null">
+			 limit #{query.simplePage.start},#{query.simplePage.end}
+		 </if>
+	</select>
+
+	<!-- 查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer" >
+		 SELECT count(1) FROM sms_verification_code <include refid="query_condition" />
+	</select>
+
+	<!-- 插入 （匹配有值的字段）-->
+	<insert id="insert" parameterType="com.easyding.entity.po.otherPo.SmsVerificationCode">
+		 INSERT INTO sms_verification_code
+		 <trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="bean.uTimestampId != null">
+				 u_timestamp_id,
+			</if>
+			<if test="bean.phoneNumber != null">
+				 phone_number,
+			</if>
+			<if test="bean.platformName != null">
+				 platform_name,
+			</if>
+			<if test="bean.verificationCode != null">
+				 verification_code,
+			</if>
+			<if test="bean.expiredFlag != null">
+				 expired_flag,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="bean.uTimestampId!=null">
+				 #{bean.uTimestampId},
+			</if>
+			<if test="bean.phoneNumber!=null">
+				 #{bean.phoneNumber},
+			</if>
+			<if test="bean.platformName!=null">
+				 #{bean.platformName},
+			</if>
+			<if test="bean.verificationCode!=null">
+				 #{bean.verificationCode},
+			</if>
+			<if test="bean.expiredFlag!=null">
+				 #{bean.expiredFlag},
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 插入或者更新 （匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.easyding.entity.po.otherPo.SmsVerificationCode">
+		 INSERT INTO sms_verification_code
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.uTimestampId != null">
+				 u_timestamp_id,
+			</if>
+			<if test="bean.phoneNumber != null">
+				 phone_number,
+			</if>
+			<if test="bean.platformName != null">
+				 platform_name,
+			</if>
+			<if test="bean.verificationCode != null">
+				 verification_code,
+			</if>
+			<if test="bean.expiredFlag != null">
+				 expired_flag,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.uTimestampId!=null">
+				 #{bean.uTimestampId},
+			</if>
+			<if test="bean.phoneNumber!=null">
+				 #{bean.phoneNumber},
+			</if>
+			<if test="bean.platformName!=null">
+				 #{bean.platformName},
+			</if>
+			<if test="bean.verificationCode!=null">
+				 #{bean.verificationCode},
+			</if>
+			<if test="bean.expiredFlag!=null">
+				 #{bean.expiredFlag},
+			</if>
+		 </trim>
+		 on DUPLICATE key update 
+		 <trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.uTimestampId!=null">
+				 u_timestamp_id = VALUES(u_timestamp_id),
+			</if>
+			<if test="bean.phoneNumber!=null">
+				 phone_number = VALUES(phone_number),
+			</if>
+			<if test="bean.platformName!=null">
+				 platform_name = VALUES(platform_name),
+			</if>
+			<if test="bean.verificationCode!=null">
+				 verification_code = VALUES(verification_code),
+			</if>
+			<if test="bean.expiredFlag!=null">
+				 expired_flag = VALUES(expired_flag),
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 添加 （批量插入）-->
+	<insert id="insertBatch" parameterType="com.easyding.entity.po.otherPo.SmsVerificationCode">
+		 INSERT INTO sms_verification_code(
+			 u_timestamp_id,
+			 phone_number,
+			 platform_name,
+			 verification_code,
+			 expired_flag
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.uTimestampId},
+				 #{item.phoneNumber},
+				 #{item.platformName},
+				 #{item.verificationCode},
+				 #{item.expiredFlag}
+			 )
+		 </foreach>
+	</insert>
+
+	<!-- 批量新增修改 （批量插入）-->
+	<insert id="insertOrUpdateBatch" parameterType="com.easyding.entity.po.otherPo.SmsVerificationCode">
+		 INSERT INTO sms_verification_code(
+			 u_timestamp_id,
+			 phone_number,
+			 platform_name,
+			 verification_code,
+			 expired_flag
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.uTimestampId},
+				 #{item.phoneNumber},
+				 #{item.platformName},
+				 #{item.verificationCode},
+				 #{item.expiredFlag}
+			 )
+		 </foreach>
+			on DUPLICATE key update 
+			u_timestamp_id = VALUES(u_timestamp_id),
+			phone_number = VALUES(phone_number),
+			platform_name = VALUES(platform_name),
+			verification_code = VALUES(verification_code),
+			expired_flag = VALUES(expired_flag)
+	</insert>
+
+	<!--多条件修改-->
+	<update id="updateByParam" parameterType="com.easyding.entity.query.SmsVerificationCodeQuery">
+		 UPDATE sms_verification_code
+ 		 <set> 
+			<if test="bean.uTimestampId != null">
+				 u_timestamp_id = #{bean.uTimestampId},
+			</if>
+			<if test="bean.phoneNumber != null">
+				 phone_number = #{bean.phoneNumber},
+			</if>
+			<if test="bean.platformName != null">
+				 platform_name = #{bean.platformName},
+			</if>
+			<if test="bean.verificationCode != null">
+				 verification_code = #{bean.verificationCode},
+			</if>
+			<if test="bean.expiredFlag != null">
+				 expired_flag = #{bean.expiredFlag},
+			</if>
+ 		 </set>
+ 		 <include refid="query_condition" />
+	</update>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		 delete from sms_verification_code
+ 		 <include refid="query_condition" />
+	</delete>
+
+	<!-- 根据uTimestampIdAndPhoneNumberAndPlatformName修改-->
+	<update id="updateByuTimestampIdAndPhoneNumberAndPlatformName" parameterType="com.easyding.entity.po.otherPo.SmsVerificationCode">
+		 UPDATE sms_verification_code
+ 		 <set> 
+			<if test="bean.verificationCode != null">
+				 verification_code = #{bean.verificationCode},
+			</if>
+			<if test="bean.expiredFlag != null">
+				 expired_flag = #{bean.expiredFlag},
+			</if>
+ 		 </set>
+ 		 where u_timestamp_id=#{uTimestampId} and phone_number=#{phoneNumber} and platform_name=#{platformName}
+	</update>
+
+	<!-- 根据uTimestampIdAndPhoneNumberAndPlatformName删除-->
+	<delete id="deleteByuTimestampIdAndPhoneNumberAndPlatformName">
+		delete from sms_verification_code where u_timestamp_id=#{uTimestampId} and phone_number=#{phoneNumber} and platform_name=#{platformName}
+	</delete>
+
+	<!-- 根据PrimaryKey获取对象-->
+	<select id="selectByuTimestampIdAndPhoneNumberAndPlatformName" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from sms_verification_code where u_timestamp_id=#{uTimestampId} and phone_number=#{phoneNumber} and platform_name=#{platformName}
+	</select>
+
+</mapper>

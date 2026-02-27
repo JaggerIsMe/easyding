@@ -1,0 +1,657 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.easyding.mappers.JobRunResultNotificationInfoMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.easyding.entity.po.indeedPo.JobRunResultNotificationInfo">
+		<!--任务UUID-->
+		<result column="job_uuid" property="jobUuid"  />
+		<!--执行UUID-->
+		<result column="work_uuid" property="workUuid"  />
+		<!--任务名称-->
+		<result column="job_name" property="jobName"  />
+		<!--状态码，1运行中，2待运行，3运行失败，4已停止，5运行成功-->
+		<result column="status" property="status"  />
+		<!--状态描述-->
+		<result column="status_desc" property="statusDesc"  />
+		<!--部门名称-->
+		<result column="dept_name" property="deptName"  />
+		<!--账户名称-->
+		<result column="account_name" property="accountName"  />
+		<!--真实姓名-->
+		<result column="real_name" property="realName"  />
+		<!--创建时间-->
+		<result column="gmt_created" property="gmtCreated"  />
+		<!--开始时间-->
+		<result column="start_time" property="startTime"  />
+		<!--结束时间-->
+		<result column="end_time" property="endTime"  />
+		<!--运行时长(秒)-->
+		<result column="run_time" property="runTime"  />
+		<!--机器人UUID-->
+		<result column="bot_uuid" property="botUuid"  />
+		<!--机器人ID-->
+		<result column="bot_id" property="botId"  />
+		<!--报错信息-->
+		<result column="fail_description" property="failDescription"  />
+		<!--是否发送通知，0未通知，1已通知-->
+		<result column="notification_flag" property="notificationFlag"  />
+	</resultMap>
+
+
+	<!-- 通用查询结果列-->
+	<sql id="base_column_list">
+		 job_uuid,work_uuid,job_name,status,status_desc,
+		 dept_name,account_name,real_name,gmt_created,start_time,
+		 end_time,run_time,bot_uuid,bot_id,fail_description,
+		 notification_flag
+	</sql>
+
+	<sql id="base_condition_filed">
+		<if test="query.jobUuid != null and query.jobUuid!=''">
+			 and  job_uuid = #{query.jobUuid}
+		</if>
+		<if test="query.workUuid != null and query.workUuid!=''">
+			 and  work_uuid = #{query.workUuid}
+		</if>
+		<if test="query.jobName != null and query.jobName!=''">
+			 and  job_name = #{query.jobName}
+		</if>
+		<if test="query.status != null">
+			 and  status = #{query.status}
+		</if>
+		<if test="query.statusDesc != null and query.statusDesc!=''">
+			 and  status_desc = #{query.statusDesc}
+		</if>
+		<if test="query.deptName != null and query.deptName!=''">
+			 and  dept_name = #{query.deptName}
+		</if>
+		<if test="query.accountName != null and query.accountName!=''">
+			 and  account_name = #{query.accountName}
+		</if>
+		<if test="query.realName != null and query.realName!=''">
+			 and  real_name = #{query.realName}
+		</if>
+		<if test="query.gmtCreated != null and query.gmtCreated!=''">
+			 <![CDATA[ and  gmt_created=str_to_date(#{query.gmtCreated}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.startTime != null and query.startTime!=''">
+			 <![CDATA[ and  start_time=str_to_date(#{query.startTime}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.endTime != null and query.endTime!=''">
+			 <![CDATA[ and  end_time=str_to_date(#{query.endTime}, '%Y-%m-%d') ]]>
+		</if>
+		<if test="query.runTime != null">
+			 and  run_time = #{query.runTime}
+		</if>
+		<if test="query.botUuid != null and query.botUuid!=''">
+			 and  bot_uuid = #{query.botUuid}
+		</if>
+		<if test="query.botId != null and query.botId!=''">
+			 and  bot_id = #{query.botId}
+		</if>
+		<if test="query.failDescription != null and query.failDescription!=''">
+			 and  fail_description = #{query.failDescription}
+		</if>
+		<if test="query.notificationFlag != null">
+			 and  notification_flag = #{query.notificationFlag}
+		</if>
+	</sql>
+
+	<!-- 通用查询条件列-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_condition_filed" />
+			<if test="query.jobUuidFuzzy!= null  and query.jobUuidFuzzy!=''">
+				 and  job_uuid like concat('%', #{query.jobUuidFuzzy}, '%')
+			</if>
+			<if test="query.workUuidFuzzy!= null  and query.workUuidFuzzy!=''">
+				 and  work_uuid like concat('%', #{query.workUuidFuzzy}, '%')
+			</if>
+			<if test="query.jobNameFuzzy!= null  and query.jobNameFuzzy!=''">
+				 and  job_name like concat('%', #{query.jobNameFuzzy}, '%')
+			</if>
+			<if test="query.statusDescFuzzy!= null  and query.statusDescFuzzy!=''">
+				 and  status_desc like concat('%', #{query.statusDescFuzzy}, '%')
+			</if>
+			<if test="query.deptNameFuzzy!= null  and query.deptNameFuzzy!=''">
+				 and  dept_name like concat('%', #{query.deptNameFuzzy}, '%')
+			</if>
+			<if test="query.accountNameFuzzy!= null  and query.accountNameFuzzy!=''">
+				 and  account_name like concat('%', #{query.accountNameFuzzy}, '%')
+			</if>
+			<if test="query.realNameFuzzy!= null  and query.realNameFuzzy!=''">
+				 and  real_name like concat('%', #{query.realNameFuzzy}, '%')
+			</if>
+			<if test="query.gmtCreatedStart!= null and query.gmtCreatedStart!=''">
+				 <![CDATA[ and  gmt_created>=str_to_date(#{query.gmtCreatedStart}, '%Y-%m-%d') ]]>
+			</if>
+			<if test="query.gmtCreatedEnd!= null and query.gmtCreatedEnd!=''">
+				 <![CDATA[ and  gmt_created< date_sub(str_to_date(#{query.gmtCreatedEnd},'%Y-%m-%d'),interval -1 day) ]]>
+			</if>
+			<if test="query.startTimeStart!= null and query.startTimeStart!=''">
+				 <![CDATA[ and  start_time>=str_to_date(#{query.startTimeStart}, '%Y-%m-%d') ]]>
+			</if>
+			<if test="query.startTimeEnd!= null and query.startTimeEnd!=''">
+				 <![CDATA[ and  start_time< date_sub(str_to_date(#{query.startTimeEnd},'%Y-%m-%d'),interval -1 day) ]]>
+			</if>
+			<if test="query.endTimeStart!= null and query.endTimeStart!=''">
+				 <![CDATA[ and  end_time>=str_to_date(#{query.endTimeStart}, '%Y-%m-%d') ]]>
+			</if>
+			<if test="query.endTimeEnd!= null and query.endTimeEnd!=''">
+				 <![CDATA[ and  end_time< date_sub(str_to_date(#{query.endTimeEnd},'%Y-%m-%d'),interval -1 day) ]]>
+			</if>
+			<if test="query.botUuidFuzzy!= null  and query.botUuidFuzzy!=''">
+				 and  bot_uuid like concat('%', #{query.botUuidFuzzy}, '%')
+			</if>
+			<if test="query.botIdFuzzy!= null  and query.botIdFuzzy!=''">
+				 and  bot_id like concat('%', #{query.botIdFuzzy}, '%')
+			</if>
+			<if test="query.failDescriptionFuzzy!= null  and query.failDescriptionFuzzy!=''">
+				 and  fail_description like concat('%', #{query.failDescriptionFuzzy}, '%')
+			</if>
+		</where>
+	</sql>
+
+	<!-- 查询集合-->
+	<select id="selectList" resultMap="base_result_map" >
+		 SELECT <include refid="base_column_list" /> FROM job_run_result_notification_info <include refid="query_condition" />
+		 <if test="query.orderBy!=null">
+			 order by ${query.orderBy}
+		 </if>
+		 <if test="query.simplePage!=null">
+			 limit #{query.simplePage.start},#{query.simplePage.end}
+		 </if>
+	</select>
+
+	<!-- 查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer" >
+		 SELECT count(1) FROM job_run_result_notification_info <include refid="query_condition" />
+	</select>
+
+	<!-- 插入 （匹配有值的字段）-->
+	<insert id="insert" parameterType="com.easyding.entity.po.indeedPo.JobRunResultNotificationInfo">
+		 INSERT INTO job_run_result_notification_info
+		 <trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="bean.jobUuid != null">
+				 job_uuid,
+			</if>
+			<if test="bean.workUuid != null">
+				 work_uuid,
+			</if>
+			<if test="bean.jobName != null">
+				 job_name,
+			</if>
+			<if test="bean.status != null">
+				 status,
+			</if>
+			<if test="bean.statusDesc != null">
+				 status_desc,
+			</if>
+			<if test="bean.deptName != null">
+				 dept_name,
+			</if>
+			<if test="bean.accountName != null">
+				 account_name,
+			</if>
+			<if test="bean.realName != null">
+				 real_name,
+			</if>
+			<if test="bean.gmtCreated != null">
+				 gmt_created,
+			</if>
+			<if test="bean.startTime != null">
+				 start_time,
+			</if>
+			<if test="bean.endTime != null">
+				 end_time,
+			</if>
+			<if test="bean.runTime != null">
+				 run_time,
+			</if>
+			<if test="bean.botUuid != null">
+				 bot_uuid,
+			</if>
+			<if test="bean.botId != null">
+				 bot_id,
+			</if>
+			<if test="bean.failDescription != null">
+				 fail_description,
+			</if>
+			<if test="bean.notificationFlag != null">
+				 notification_flag,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="bean.jobUuid!=null">
+				 #{bean.jobUuid},
+			</if>
+			<if test="bean.workUuid!=null">
+				 #{bean.workUuid},
+			</if>
+			<if test="bean.jobName!=null">
+				 #{bean.jobName},
+			</if>
+			<if test="bean.status!=null">
+				 #{bean.status},
+			</if>
+			<if test="bean.statusDesc!=null">
+				 #{bean.statusDesc},
+			</if>
+			<if test="bean.deptName!=null">
+				 #{bean.deptName},
+			</if>
+			<if test="bean.accountName!=null">
+				 #{bean.accountName},
+			</if>
+			<if test="bean.realName!=null">
+				 #{bean.realName},
+			</if>
+			<if test="bean.gmtCreated!=null">
+				 #{bean.gmtCreated},
+			</if>
+			<if test="bean.startTime!=null">
+				 #{bean.startTime},
+			</if>
+			<if test="bean.endTime!=null">
+				 #{bean.endTime},
+			</if>
+			<if test="bean.runTime!=null">
+				 #{bean.runTime},
+			</if>
+			<if test="bean.botUuid!=null">
+				 #{bean.botUuid},
+			</if>
+			<if test="bean.botId!=null">
+				 #{bean.botId},
+			</if>
+			<if test="bean.failDescription!=null">
+				 #{bean.failDescription},
+			</if>
+			<if test="bean.notificationFlag!=null">
+				 #{bean.notificationFlag},
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 插入或者更新 （匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.easyding.entity.po.indeedPo.JobRunResultNotificationInfo">
+		 INSERT INTO job_run_result_notification_info
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.jobUuid != null">
+				 job_uuid,
+			</if>
+			<if test="bean.workUuid != null">
+				 work_uuid,
+			</if>
+			<if test="bean.jobName != null">
+				 job_name,
+			</if>
+			<if test="bean.status != null">
+				 status,
+			</if>
+			<if test="bean.statusDesc != null">
+				 status_desc,
+			</if>
+			<if test="bean.deptName != null">
+				 dept_name,
+			</if>
+			<if test="bean.accountName != null">
+				 account_name,
+			</if>
+			<if test="bean.realName != null">
+				 real_name,
+			</if>
+			<if test="bean.gmtCreated != null">
+				 gmt_created,
+			</if>
+			<if test="bean.startTime != null">
+				 start_time,
+			</if>
+			<if test="bean.endTime != null">
+				 end_time,
+			</if>
+			<if test="bean.runTime != null">
+				 run_time,
+			</if>
+			<if test="bean.botUuid != null">
+				 bot_uuid,
+			</if>
+			<if test="bean.botId != null">
+				 bot_id,
+			</if>
+			<if test="bean.failDescription != null">
+				 fail_description,
+			</if>
+			<if test="bean.notificationFlag != null">
+				 notification_flag,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.jobUuid!=null">
+				 #{bean.jobUuid},
+			</if>
+			<if test="bean.workUuid!=null">
+				 #{bean.workUuid},
+			</if>
+			<if test="bean.jobName!=null">
+				 #{bean.jobName},
+			</if>
+			<if test="bean.status!=null">
+				 #{bean.status},
+			</if>
+			<if test="bean.statusDesc!=null">
+				 #{bean.statusDesc},
+			</if>
+			<if test="bean.deptName!=null">
+				 #{bean.deptName},
+			</if>
+			<if test="bean.accountName!=null">
+				 #{bean.accountName},
+			</if>
+			<if test="bean.realName!=null">
+				 #{bean.realName},
+			</if>
+			<if test="bean.gmtCreated!=null">
+				 #{bean.gmtCreated},
+			</if>
+			<if test="bean.startTime!=null">
+				 #{bean.startTime},
+			</if>
+			<if test="bean.endTime!=null">
+				 #{bean.endTime},
+			</if>
+			<if test="bean.runTime!=null">
+				 #{bean.runTime},
+			</if>
+			<if test="bean.botUuid!=null">
+				 #{bean.botUuid},
+			</if>
+			<if test="bean.botId!=null">
+				 #{bean.botId},
+			</if>
+			<if test="bean.failDescription!=null">
+				 #{bean.failDescription},
+			</if>
+			<if test="bean.notificationFlag!=null">
+				 #{bean.notificationFlag},
+			</if>
+		 </trim>
+		 on DUPLICATE key update 
+		 <trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.jobUuid!=null">
+				 job_uuid = VALUES(job_uuid),
+			</if>
+			<if test="bean.workUuid!=null">
+				 work_uuid = VALUES(work_uuid),
+			</if>
+			<if test="bean.jobName!=null">
+				 job_name = VALUES(job_name),
+			</if>
+			<if test="bean.status!=null">
+				 status = VALUES(status),
+			</if>
+			<if test="bean.statusDesc!=null">
+				 status_desc = VALUES(status_desc),
+			</if>
+			<if test="bean.deptName!=null">
+				 dept_name = VALUES(dept_name),
+			</if>
+			<if test="bean.accountName!=null">
+				 account_name = VALUES(account_name),
+			</if>
+			<if test="bean.realName!=null">
+				 real_name = VALUES(real_name),
+			</if>
+			<if test="bean.gmtCreated!=null">
+				 gmt_created = VALUES(gmt_created),
+			</if>
+			<if test="bean.startTime!=null">
+				 start_time = VALUES(start_time),
+			</if>
+			<if test="bean.endTime!=null">
+				 end_time = VALUES(end_time),
+			</if>
+			<if test="bean.runTime!=null">
+				 run_time = VALUES(run_time),
+			</if>
+			<if test="bean.botUuid!=null">
+				 bot_uuid = VALUES(bot_uuid),
+			</if>
+			<if test="bean.botId!=null">
+				 bot_id = VALUES(bot_id),
+			</if>
+			<if test="bean.failDescription!=null">
+				 fail_description = VALUES(fail_description),
+			</if>
+			<if test="bean.notificationFlag!=null">
+				 notification_flag = VALUES(notification_flag),
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 添加 （批量插入）-->
+	<insert id="insertBatch" parameterType="com.easyding.entity.po.indeedPo.JobRunResultNotificationInfo">
+		 INSERT INTO job_run_result_notification_info(
+			 job_uuid,
+			 work_uuid,
+			 job_name,
+			 status,
+			 status_desc,
+			 dept_name,
+			 account_name,
+			 real_name,
+			 gmt_created,
+			 start_time,
+			 end_time,
+			 run_time,
+			 bot_uuid,
+			 bot_id,
+			 fail_description,
+			 notification_flag
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.jobUuid},
+				 #{item.workUuid},
+				 #{item.jobName},
+				 #{item.status},
+				 #{item.statusDesc},
+				 #{item.deptName},
+				 #{item.accountName},
+				 #{item.realName},
+				 #{item.gmtCreated},
+				 #{item.startTime},
+				 #{item.endTime},
+				 #{item.runTime},
+				 #{item.botUuid},
+				 #{item.botId},
+				 #{item.failDescription},
+				 #{item.notificationFlag}
+			 )
+		 </foreach>
+	</insert>
+
+	<!-- 批量新增修改 （批量插入）-->
+	<insert id="insertOrUpdateBatch" parameterType="com.easyding.entity.po.indeedPo.JobRunResultNotificationInfo">
+		 INSERT INTO job_run_result_notification_info(
+			 job_uuid,
+			 work_uuid,
+			 job_name,
+			 status,
+			 status_desc,
+			 dept_name,
+			 account_name,
+			 real_name,
+			 gmt_created,
+			 start_time,
+			 end_time,
+			 run_time,
+			 bot_uuid,
+			 bot_id,
+			 fail_description,
+			 notification_flag
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.jobUuid},
+				 #{item.workUuid},
+				 #{item.jobName},
+				 #{item.status},
+				 #{item.statusDesc},
+				 #{item.deptName},
+				 #{item.accountName},
+				 #{item.realName},
+				 #{item.gmtCreated},
+				 #{item.startTime},
+				 #{item.endTime},
+				 #{item.runTime},
+				 #{item.botUuid},
+				 #{item.botId},
+				 #{item.failDescription},
+				 #{item.notificationFlag}
+			 )
+		 </foreach>
+			on DUPLICATE key update 
+			job_uuid = VALUES(job_uuid),
+			work_uuid = VALUES(work_uuid),
+			job_name = VALUES(job_name),
+			status = VALUES(status),
+			status_desc = VALUES(status_desc),
+			dept_name = VALUES(dept_name),
+			account_name = VALUES(account_name),
+			real_name = VALUES(real_name),
+			gmt_created = VALUES(gmt_created),
+			start_time = VALUES(start_time),
+			end_time = VALUES(end_time),
+			run_time = VALUES(run_time),
+			bot_uuid = VALUES(bot_uuid),
+			bot_id = VALUES(bot_id),
+			fail_description = VALUES(fail_description),
+			notification_flag = VALUES(notification_flag)
+	</insert>
+
+	<!--多条件修改-->
+	<update id="updateByParam" parameterType="com.easyding.entity.query.JobRunResultNotificationInfoQuery">
+		 UPDATE job_run_result_notification_info
+ 		 <set> 
+			<if test="bean.jobUuid != null">
+				 job_uuid = #{bean.jobUuid},
+			</if>
+			<if test="bean.workUuid != null">
+				 work_uuid = #{bean.workUuid},
+			</if>
+			<if test="bean.jobName != null">
+				 job_name = #{bean.jobName},
+			</if>
+			<if test="bean.status != null">
+				 status = #{bean.status},
+			</if>
+			<if test="bean.statusDesc != null">
+				 status_desc = #{bean.statusDesc},
+			</if>
+			<if test="bean.deptName != null">
+				 dept_name = #{bean.deptName},
+			</if>
+			<if test="bean.accountName != null">
+				 account_name = #{bean.accountName},
+			</if>
+			<if test="bean.realName != null">
+				 real_name = #{bean.realName},
+			</if>
+			<if test="bean.gmtCreated != null">
+				 gmt_created = #{bean.gmtCreated},
+			</if>
+			<if test="bean.startTime != null">
+				 start_time = #{bean.startTime},
+			</if>
+			<if test="bean.endTime != null">
+				 end_time = #{bean.endTime},
+			</if>
+			<if test="bean.runTime != null">
+				 run_time = #{bean.runTime},
+			</if>
+			<if test="bean.botUuid != null">
+				 bot_uuid = #{bean.botUuid},
+			</if>
+			<if test="bean.botId != null">
+				 bot_id = #{bean.botId},
+			</if>
+			<if test="bean.failDescription != null">
+				 fail_description = #{bean.failDescription},
+			</if>
+			<if test="bean.notificationFlag != null">
+				 notification_flag = #{bean.notificationFlag},
+			</if>
+ 		 </set>
+ 		 <include refid="query_condition" />
+	</update>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		 delete from job_run_result_notification_info
+ 		 <include refid="query_condition" />
+	</delete>
+
+	<!-- 根据JobUuidAndWorkUuid修改-->
+	<update id="updateByJobUuidAndWorkUuid" parameterType="com.easyding.entity.po.indeedPo.JobRunResultNotificationInfo">
+		 UPDATE job_run_result_notification_info
+ 		 <set> 
+			<if test="bean.jobName != null">
+				 job_name = #{bean.jobName},
+			</if>
+			<if test="bean.status != null">
+				 status = #{bean.status},
+			</if>
+			<if test="bean.statusDesc != null">
+				 status_desc = #{bean.statusDesc},
+			</if>
+			<if test="bean.deptName != null">
+				 dept_name = #{bean.deptName},
+			</if>
+			<if test="bean.accountName != null">
+				 account_name = #{bean.accountName},
+			</if>
+			<if test="bean.realName != null">
+				 real_name = #{bean.realName},
+			</if>
+			<if test="bean.gmtCreated != null">
+				 gmt_created = #{bean.gmtCreated},
+			</if>
+			<if test="bean.startTime != null">
+				 start_time = #{bean.startTime},
+			</if>
+			<if test="bean.endTime != null">
+				 end_time = #{bean.endTime},
+			</if>
+			<if test="bean.runTime != null">
+				 run_time = #{bean.runTime},
+			</if>
+			<if test="bean.botUuid != null">
+				 bot_uuid = #{bean.botUuid},
+			</if>
+			<if test="bean.botId != null">
+				 bot_id = #{bean.botId},
+			</if>
+			<if test="bean.failDescription != null">
+				 fail_description = #{bean.failDescription},
+			</if>
+			<if test="bean.notificationFlag != null">
+				 notification_flag = #{bean.notificationFlag},
+			</if>
+ 		 </set>
+ 		 where job_uuid=#{jobUuid} and work_uuid=#{workUuid}
+	</update>
+
+	<!-- 根据JobUuidAndWorkUuid删除-->
+	<delete id="deleteByJobUuidAndWorkUuid">
+		delete from job_run_result_notification_info where job_uuid=#{jobUuid} and work_uuid=#{workUuid}
+	</delete>
+
+	<!-- 根据PrimaryKey获取对象-->
+	<select id="selectByJobUuidAndWorkUuid" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from job_run_result_notification_info where job_uuid=#{jobUuid} and work_uuid=#{workUuid}
+	</select>
+
+</mapper>
