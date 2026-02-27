@@ -140,7 +140,6 @@ public class SmsVerificationCodeServiceImpl implements SmsVerificationCodeServic
 	 */
 	@Override
 	public void receiveNewCode(SmsVerificationCode bean) {
-
 		// 使老验证码过期
 		SmsVerificationCodeQuery param = new SmsVerificationCodeQuery();
 		param.setPhoneNumber(bean.getPhoneNumber());
@@ -150,10 +149,9 @@ public class SmsVerificationCodeServiceImpl implements SmsVerificationCodeServic
 		updateBean.setExpiredFlag(1);
 		this.updateByParam(updateBean, param);
 
+		// 添加新验证码
 		bean.setuTimestampId(System.currentTimeMillis());
 		bean.setExpiredFlag(0);
-		logger.info(bean.toString());
-		// 添加新验证码
 		this.add(bean);
 	}
 
