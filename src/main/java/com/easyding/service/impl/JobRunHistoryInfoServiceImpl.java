@@ -199,7 +199,7 @@ public class JobRunHistoryInfoServiceImpl implements JobRunHistoryInfoService {
                 record.setAddFlag(0);
             });
 
-            this.addBatch(records);
+            this.addOrUpdateBatch(records);
 
         } catch (IOException e) {
             logger.error(e.getMessage());
