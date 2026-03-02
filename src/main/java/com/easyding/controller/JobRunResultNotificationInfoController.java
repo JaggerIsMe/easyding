@@ -86,11 +86,12 @@ public class JobRunResultNotificationInfoController extends ABaseController{
 	/**
 	 * 发送任务执行结果通知(群)
 	 *
+	 * @param unionID
 	 * @param openConversationID
 	 */
 	@RequestMapping("/sendJobExecuteResultNotification")
-	public ResponseVO sendJobExecuteResultNotification(@RequestHeader("openConversationID") String openConversationID) {
-		jobRunResultNotificationInfoService.sendJobExecuteResultNotification(openConversationID);
+	public ResponseVO sendJobExecuteResultNotification(@RequestHeader("unionID") String unionID, @RequestHeader("openConversationID") String openConversationID) {
+		jobRunResultNotificationInfoService.sendJobExecuteResultNotification(unionID, openConversationID);
 		return getSuccessResponseVO(null);
 	}
 

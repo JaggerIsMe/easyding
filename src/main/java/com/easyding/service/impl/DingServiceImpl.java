@@ -52,21 +52,21 @@ public class DingServiceImpl implements DingService {
      * @return Client
      * @throws Exception
      */
-    public static com.aliyun.dingtalkcard_1_0.Client createCardClient() throws Exception {
+    private static com.aliyun.dingtalkcard_1_0.Client createCardClient() throws Exception {
         com.aliyun.teaopenapi.models.Config config = new com.aliyun.teaopenapi.models.Config();
         config.protocol = "https";
         config.regionId = "central";
         return new com.aliyun.dingtalkcard_1_0.Client(config);
     }
 
-    public static com.aliyun.dingtalkoauth2_1_0.Client createTokenClient() throws Exception {
+    private static com.aliyun.dingtalkoauth2_1_0.Client createTokenClient() throws Exception {
         com.aliyun.teaopenapi.models.Config config = new com.aliyun.teaopenapi.models.Config();
         config.protocol = "https";
         config.regionId = "central";
         return new com.aliyun.dingtalkoauth2_1_0.Client(config);
     }
 
-    public static com.aliyun.dingtalknotable_1_0.Client createNoTableClient() throws Exception {
+    private static com.aliyun.dingtalknotable_1_0.Client createNoTableClient() throws Exception {
         com.aliyun.teaopenapi.models.Config config = new com.aliyun.teaopenapi.models.Config();
         config.protocol = "https";
         config.regionId = "central";

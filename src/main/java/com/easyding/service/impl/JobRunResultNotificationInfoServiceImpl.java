@@ -1,19 +1,25 @@
 package com.easyding.service.impl;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-
-import javax.annotation.Resource;
-
+import com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest;
+import com.aliyun.dingtalknotable_1_0.models.ListRecordsRequest;
+import com.aliyun.dingtalknotable_1_0.models.ListRecordsResponseBody;
 import com.easyding.config.AppConfig;
 import com.easyding.entity.enums.DateTimePatternEnum;
+import com.easyding.entity.enums.IndeedJobRunResultNotificationFlagEnum;
 import com.easyding.entity.enums.IndeedJobStatusEnum;
+import com.easyding.entity.enums.PageSize;
+import com.easyding.entity.po.indeedPo.IndeedJobRunHistoryDetailResponseBodyData;
 import com.easyding.entity.po.indeedPo.IndeedJobRunHistoryResponseBody;
+import com.easyding.entity.po.indeedPo.JobRunResultNotificationInfo;
+import com.easyding.entity.query.JobRunResultNotificationInfoQuery;
+import com.easyding.entity.query.SimplePage;
+import com.easyding.entity.vo.PaginationResultVO;
+import com.easyding.mappers.JobRunResultNotificationInfoMapper;
+import com.easyding.service.DingService;
 import com.easyding.service.JobRunHistoryInfoService;
+import com.easyding.service.JobRunResultNotificationInfoService;
 import com.easyding.utils.DateUtil;
+import com.easyding.utils.StringTools;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
@@ -21,14 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.easyding.entity.enums.PageSize;
-import com.easyding.entity.query.JobRunResultNotificationInfoQuery;
-import com.easyding.entity.po.indeedPo.JobRunResultNotificationInfo;
-import com.easyding.entity.vo.PaginationResultVO;
-import com.easyding.entity.query.SimplePage;
-import com.easyding.mappers.JobRunResultNotificationInfoMapper;
-import com.easyding.service.JobRunResultNotificationInfoService;
-import com.easyding.utils.StringTools;
+import javax.annotation.Resource;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 
 /**
@@ -43,13 +46,16 @@ public class JobRunResultNotificationInfoServiceImpl implements JobRunResultNoti
     private JobRunResultNotificationInfoMapper<JobRunResultNotificationInfo, JobRunResultNotificationInfoQuery> jobRunResultNotificationInfoMapper;
 
     @Resource
-    private JobRunHistoryInfoService jobRunHistoryInfoService;
+    private DingService dingService;
 
     @Resource
     private AppConfig appConfig;
 
     @Resource
     private ObjectMapper objectMapper;
+
+    @Resource
+    private JobRunHistoryInfoService jobRunHistoryInfoService;
 
     /**
      * 根据条件查询列表
@@ -158,8 +164,7 @@ public class JobRunResultNotificationInfoServiceImpl implements JobRunResultNoti
      * 只获取执行成功和失败的任务运行记录
      *
      * @param startDateStr
-     * @param endDateStr
-     * startDateStr: 2026-02-09 00:00:00, endDateStr: 2026-02-09 23:59:59
+     * @param endDateStr   startDateStr: 2026-02-09 00:00:00, endDateStr: 2026-02-09 23:59:59
      * @return
      */
     @Override
@@ -205,20 +210,108 @@ public class JobRunResultNotificationInfoServiceImpl implements JobRunResultNoti
     /**
      * 发送任务执行结果通知(群)
      *
+     * @param unionID
      * @param openConversationID
      */
     @Override
-    public void sendJobExecuteResultNotification(String openConversationID) {
+    public void sendJobExecuteResultNotification(String unionID, String openConversationID) {
 
         // 获取当前时间
         LocalDateTime now = LocalDateTime.now();
-        // 获取48小时前的时间
-        LocalDateTime before = now.minusHours(48);
+        // 获取指定小时前的时间
+        LocalDateTime before = now.minusHours(appConfig.getNotificationAheadHours());
+        String endTimeStr = DateUtil.format(Date.from(now.atZone(ZoneId.systemDefault()).toInstant()), DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern());
+        String startTimeStr = DateUtil.format(Date.from(before.atZone(ZoneId.systemDefault()).toInstant()), DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern());
+        List<JobRunResultNotificationInfo> jobRunResultSuccessAndFailList = this.getJobRunResultSuccessAndFail(startTimeStr, endTimeStr);
 
-        String endTimeStr = DateUtil.format(Date.from(before.atZone(ZoneId.systemDefault()).toInstant()), DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern());
-        String startTimeStr = DateUtil.format(Date.from(now.atZone(ZoneId.systemDefault()).toInstant()), DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern());
-        logger.info("开始时间：" + startTimeStr + " 结束时间：" + endTimeStr);
+        jobRunResultSuccessAndFailList.forEach(jobRunResult -> {
+            /**
+             * 检查钉钉多维表 档案室 unionID是否匹配
+             * 构建filter
+             * {
+             *     "combination": "and",
+             *     "conditions": [
+             *         {
+             *             "field": "jobUUID",
+             *             "operator": "equal",
+             *             "value": [
+             *                 "44fbf32eb6228ec0c603a92c73193329"
+             *             ]
+             *         },
+             *         {
+             *             "field": "开发人员",
+             *             "operator": "contain",
+             *             "value": [
+             *                 {
+             *                     "unionId": "H2mNA5ScfH2VegzCmE80ywiEiE"
+             *                 }
+             *             ]
+             *         }
+             *     ]
+             * }
+             */
+            ListRecordsRequest.ListRecordsRequestFilter filter = new ListRecordsRequest.ListRecordsRequestFilter();
+            filter.setCombination("and");
+            filter.setConditions(new ArrayList<ListRecordsRequest.ListRecordsRequestFilterConditions>() {{
+                add(new ListRecordsRequest.ListRecordsRequestFilterConditions()
+                        .setField("jobUUID")
+                        .setOperator("equal")
+                        .setValue(Collections.singletonList(jobRunResult.getJobUuid())));
+                add(new ListRecordsRequest.ListRecordsRequestFilterConditions()
+                        .setField("开发人员")
+                        .setOperator("contain")
+                        .setValue(Collections.singletonList(Collections.singletonMap("unionId", unionID))));
+            }});
 
+            List<ListRecordsResponseBody.ListRecordsResponseBodyRecords> records = dingService.listAllRecordsByFilter(appConfig.getDingMpBaseId(), appConfig.getDingMpSheetId(), filter);
+            // 如果运行记录和unionId匹配 则发送通知
+            if (records.size() == 1) {
+                // 检查数据库job_run_result_notification_info表中是否存在该记录且已经发送过结果通知
+                JobRunResultNotificationInfoQuery jobRunResultNotificationInfoQuery = new JobRunResultNotificationInfoQuery();
+                jobRunResultNotificationInfoQuery.setJobUuid(jobRunResult.getJobUuid());
+                jobRunResultNotificationInfoQuery.setWorkUuid(jobRunResult.getWorkUuid());
+                jobRunResultNotificationInfoQuery.setNotificationFlag(IndeedJobRunResultNotificationFlagEnum.NOTIFIED.getCode());
+                // 如果存在该记录且已通知 则跳过处理
+                if (this.findCountByParam(jobRunResultNotificationInfoQuery) == 0) {
+                    // 如果不存在该记录(或存在但未通知) 则新增(或更新)
+                    // 执行成功的 发送成功通知
+                    if (jobRunResult.getStatus().equals(IndeedJobStatusEnum.SUCCESS.getCode())) {
+                        // 构建成功的卡片内容cardData
+                        CreateAndDeliverRequest.CreateAndDeliverRequestCardData cardData = new CreateAndDeliverRequest.CreateAndDeliverRequestCardData();
+                        cardData.setCardParamMap(new HashMap<String, String>() {{
+                            put("jobName", jobRunResult.getJobName());
+                            put("accountName", jobRunResult.getAccountName());
+                            put("startTime", DateUtil.format(jobRunResult.getStartTime(), DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern()));
+                            put("endTime", DateUtil.format(jobRunResult.getEndTime(), DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern()));
+                            put("runTime", String.valueOf(jobRunResult.getRunTime() / 60));
+                        }});
+                        dingService.sendCard2Group(openConversationID, appConfig.getDingSuccessCardTemplateId(), cardData);
+                    }
+                    // 执行失败的 发送失败通知
+                    if (jobRunResult.getStatus().equals(IndeedJobStatusEnum.FAILED.getCode())) {
+                        // 查询失败原因
+                        IndeedJobRunHistoryDetailResponseBodyData jobRunHistoryDetail = jobRunHistoryInfoService.getJobRunHistoryDetailByWorkUUID(jobRunResult.getWorkUuid());
+                        jobRunResult.setFailDescription(jobRunHistoryDetail.getFailDescription());
+                        // 构建失败的卡片内容cardData
+                        CreateAndDeliverRequest.CreateAndDeliverRequestCardData cardData = new CreateAndDeliverRequest.CreateAndDeliverRequestCardData();
+                        cardData.setCardParamMap(new HashMap<String, String>() {{
+                            put("jobName", jobRunResult.getJobName());
+                            put("failDescription", jobRunResult.getFailDescription());
+                            put("accountName", jobRunResult.getAccountName());
+                            put("startTime", DateUtil.format(jobRunResult.getStartTime(), DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern()));
+                            put("endTime", DateUtil.format(jobRunResult.getEndTime(), DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern()));
+                            put("runTime", String.valueOf(jobRunResult.getRunTime() / 60));
+                            put("jobUUID", jobRunResult.getJobUuid());
+                        }});
+                        dingService.sendCard2Group(openConversationID, appConfig.getDingFailCardTemplateId(), cardData);
+                    }
+                    // 数据库操作
+                    jobRunResult.setNotificationFlag(IndeedJobRunResultNotificationFlagEnum.NOTIFIED.getCode());
+                    this.addOrUpdateBatch(Collections.singletonList(jobRunResult));
+                }
+            }
+
+        });
 
     }
 

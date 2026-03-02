@@ -115,4 +115,16 @@ public class JobRunHistoryInfoController extends ABaseController{
 		jobRunHistoryInfoService.reloadJobRunHistory();
 		return getSuccessResponseVO(null);
 	}
+
+	/**
+	 * 根据workUuid获取运行详情
+	 *
+	 * @param workUuid
+	 * @return
+	 */
+	@RequestMapping("/getJobRunHistoryDetailByWorkUUID")
+	public ResponseVO getJobRunHistoryDetailByWorkUUID(@RequestParam("workUuid") String workUuid) {
+		return getSuccessResponseVO(jobRunHistoryInfoService.getJobRunHistoryDetailByWorkUUID(workUuid));
+	}
+
 }

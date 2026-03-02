@@ -82,8 +82,9 @@ public interface JobRunResultNotificationInfoService {
 	/**
 	 * 发送任务执行结果通知(群)
 	 *
+	 * @param unionID
 	 * @param openConversationID
 	 */
-	void sendJobExecuteResultNotification(String openConversationID);
+	void sendJobExecuteResultNotification(String unionID, String openConversationID);
 
 }

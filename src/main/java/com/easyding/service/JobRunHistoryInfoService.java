@@ -2,6 +2,7 @@ package com.easyding.service;
 
 import java.util.List;
 
+import com.easyding.entity.po.indeedPo.IndeedJobRunHistoryDetailResponseBodyData;
 import com.easyding.entity.query.JobRunHistoryInfoQuery;
 import com.easyding.entity.po.indeedPo.JobRunHistoryInfo;
 import com.easyding.entity.vo.PaginationResultVO;
@@ -90,5 +91,13 @@ public interface JobRunHistoryInfoService {
 	 * 更新运行状态为1或者2的旧记录
 	 */
 	void reloadJobRunHistory();
+
+	/**
+	 * 根据workUuid获取运行详情
+	 *
+	 * @param workUuid
+	 * @return
+	 */
+	IndeedJobRunHistoryDetailResponseBodyData getJobRunHistoryDetailByWorkUUID(String workUuid);
 
 }
