@@ -258,6 +258,7 @@ public class DingServiceImpl implements DingService {
      */
     @Override
     public void updateCard(DingCardCallbackData dingCardCallbackData) {
+        logger.info("dingCardCallbackData：" + dingCardCallbackData.toString());
 
         try {
             com.aliyun.dingtalkcard_1_0.Client client = DingServiceImpl.createCardClient();
@@ -300,12 +301,12 @@ public class DingServiceImpl implements DingService {
 
             // 执行流程
             // 判断是否有回传JobUUID，有则调用实在API执行任务
-            if (params != null && params.containsKey("jobUUID")) {
+            if (params.containsKey("jobUUID")) {
                 String jobUUID = params.get("jobUUID");
                 String jobParamsStr = params.get("jobParams");
-                if (jobParamsStr == null) {
-                    jobParamsStr = "{'inputParam':{}}";
-                }
+//                if (jobParamsStr == null) {
+//                    jobParamsStr = "{'inputParam':{}}";
+//                }
 //                commandJobV1(jobUUID, jobParamsStr);
                 commandJobV2(jobUUID, jobParamsStr);
             }
@@ -336,7 +337,13 @@ public class DingServiceImpl implements DingService {
         OkHttpClient client = new OkHttpClient();
 
         // 2. 构建请求体
-        RequestBody body = RequestBody.create(jobParamsStr, MediaType.parse("application/json; charset=utf-8"));
+        String bodyStr;
+        if (jobParamsStr != null){
+            bodyStr = "{\"jobUuid\":\"" + jobUUID + "\",\"operation\":1," + StringTools.removeFirstAndLastChar(jobParamsStr) + "}";
+        }else {
+            bodyStr = "{\"jobUuid\":\"" + jobUUID + "\",\"operation\":1}";
+        }
+        RequestBody body = RequestBody.create(bodyStr, MediaType.parse("application/json; charset=utf-8"));
 
         // 3. 构建请求
         Request request = new Request.Builder()
@@ -367,13 +374,18 @@ public class DingServiceImpl implements DingService {
         OkHttpClient client = new OkHttpClient();
 
         // 2. 构建请求体
-        String bodyStr = "{\"jobUuid\":\"" + jobUUID + "\",\"operation\":1," + StringTools.removeFirstAndLastChar(jobParamsStr) + "}";
+        String bodyStr;
+        if (jobParamsStr != null){
+            bodyStr = "{\"jobUuid\":\"" + jobUUID + "\",\"operation\":1," + StringTools.removeFirstAndLastChar(jobParamsStr) + "}";
+        }else {
+            bodyStr = "{\"jobUuid\":\"" + jobUUID + "\",\"operation\":1}";
+        }
         RequestBody body = RequestBody.create(bodyStr, MediaType.parse("application/json; charset=utf-8"));
 
         // 3. 构建请求
         Request request = new Request.Builder()
                 .url(String.format("%s/v2/job/operation", appConfig.getIndeedApiUrl()))
-                .put(body)  // PUT 方法
+                .post(body)
                 .addHeader("appKey", appConfig.getIndeedAppKey())
                 .addHeader("appSecret", appConfig.getIndeedAppSecret())
                 .build();
