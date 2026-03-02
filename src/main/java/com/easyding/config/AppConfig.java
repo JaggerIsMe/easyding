@@ -34,6 +34,12 @@ public class AppConfig {
     @Value("${ding.hsSheetId}")
     private String dingHsSheetId;
 
+    @Value("${ding.successCardTemplateId}")
+    private String dingSuccessCardTemplateId;
+
+    @Value("${ding.failCardTemplateId}")
+    private String dingFailCardTemplateId;
+
     @Value("${indeed.commandJobAPIUrl}")
     private String indeedApiUrl;
 
@@ -42,6 +48,9 @@ public class AppConfig {
 
     @Value("${indeed.appSecret}")
     private String indeedAppSecret;
+
+    @Value("${indeed.notificationAheadHours}")
+    private int notificationAheadHours;
 
     public String getDingAppKey() {
         return dingAppKey;
@@ -79,6 +88,14 @@ public class AppConfig {
         return dingHsSheetId;
     }
 
+    public String getDingSuccessCardTemplateId() {
+        return dingSuccessCardTemplateId;
+    }
+
+    public String getDingFailCardTemplateId() {
+        return dingFailCardTemplateId;
+    }
+
     public String getIndeedApiUrl() {
         return indeedApiUrl;
     }
@@ -89,5 +106,9 @@ public class AppConfig {
 
     public String getIndeedAppSecret() {
         return indeedAppSecret;
+    }
+
+    public int getNotificationAheadHours() {
+        return notificationAheadHours;
     }
 }

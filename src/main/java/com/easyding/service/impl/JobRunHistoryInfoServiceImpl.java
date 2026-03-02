@@ -317,4 +317,45 @@ public class JobRunHistoryInfoServiceImpl implements JobRunHistoryInfoService {
             }
         });
     }
+
+    /**
+     * 根据workUuid获取运行详情
+     *
+     * @param workUuid
+     * @return
+     */
+    @Override
+    public IndeedJobRunHistoryDetailResponseBodyData getJobRunHistoryDetailByWorkUUID(String workUuid) {
+
+        // 1. 创建 OkHttpClient 实例
+        OkHttpClient client = new OkHttpClient();
+        // 2. 构建请求体
+        String jobParamsStr = "{\"workUuids\":[\"" + workUuid + "\"]}";
+        RequestBody body = RequestBody.create(jobParamsStr, MediaType.parse("application/json; charset=utf-8"));
+        // 3. 构建请求
+        Request request = new Request.Builder()
+                .url(String.format("%s/v1/work-list", appConfig.getIndeedApiUrl()))
+                .post(body)
+                .addHeader("appKey", appConfig.getIndeedAppKey())
+                .addHeader("appSecret", appConfig.getIndeedAppSecret())
+                .build();
+        // 4. 发送请求并处理响应
+        try (Response response = client.newCall(request).execute()) {
+
+            IndeedJobRunHistoryDetailResponseBody indeedJobRunHistoryDetailResponseBody = objectMapper.readValue(
+                    response.body().string(),
+                    new TypeReference<IndeedJobRunHistoryDetailResponseBody>() {
+                    });
+
+            List<IndeedJobRunHistoryDetailResponseBodyData> dataList = indeedJobRunHistoryDetailResponseBody.getData();
+            if (dataList != null && !dataList.isEmpty()) {
+                return dataList.get(0);
+            }
+
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+        return null;
+    }
+
 }
