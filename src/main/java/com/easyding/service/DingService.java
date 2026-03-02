@@ -2,6 +2,7 @@ package com.easyding.service;
 
 import com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest;
 import com.aliyun.dingtalknotable_1_0.models.InsertRecordsRequest;
+import com.aliyun.dingtalknotable_1_0.models.ListRecordsRequest;
 import com.aliyun.dingtalknotable_1_0.models.ListRecordsResponseBody;
 import com.aliyun.dingtalknotable_1_0.models.UpdateRecordsRequest;
 import com.easyding.entity.po.dingCardPo.DingCardCallbackData;
@@ -62,6 +63,8 @@ public interface DingService {
      *
      * @param baseId
      * @param sheetId
+     * @param records
+     * @return
      */
     void addRecords(String baseId, String sheetId, List<InsertRecordsRequest.InsertRecordsRequestRecords> records);
 
@@ -74,6 +77,18 @@ public interface DingService {
      * @return
      */
     List<ListRecordsResponseBody.ListRecordsResponseBodyRecords> listAllRecords(String baseId, String sheetId);
+
+    /**
+     * 获取钉钉表格数据
+     * 获取记录列表(筛选)
+     *
+     * @param baseId
+     * @param sheetId
+     * @param filter
+     * @return
+     */
+    List<ListRecordsResponseBody.ListRecordsResponseBodyRecords> listAllRecordsByFilter(String baseId, String sheetId, ListRecordsRequest.ListRecordsRequestFilter filter);
+
 
     /**
      * 更新表格数据

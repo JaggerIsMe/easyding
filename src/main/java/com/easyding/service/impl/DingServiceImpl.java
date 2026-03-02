@@ -1,10 +1,7 @@
 package com.easyding.service.impl;
 
 import com.aliyun.dingtalkcard_1_0.models.CreateAndDeliverRequest;
-import com.aliyun.dingtalknotable_1_0.models.InsertRecordsRequest;
-import com.aliyun.dingtalknotable_1_0.models.ListRecordsResponse;
-import com.aliyun.dingtalknotable_1_0.models.ListRecordsResponseBody;
-import com.aliyun.dingtalknotable_1_0.models.UpdateRecordsRequest;
+import com.aliyun.dingtalknotable_1_0.models.*;
 import com.aliyun.dingtalkoauth2_1_0.models.GetAccessTokenResponse;
 import com.aliyun.tea.TeaConverter;
 import com.aliyun.tea.TeaException;
@@ -32,10 +29,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Service("dingService")
@@ -253,19 +247,18 @@ public class DingServiceImpl implements DingService {
      * 更新卡片
      *
      * @param dingCardCallbackData
+     * dingCardCallbackData示例：
+     * {
+     *     "type": "actionCallback",
+     *     "outTrackId": "202601210021",
+     *     "corpId": "dingf9e2225096a9207535c2f4657eb6378f",
+     *     "userId": "01054707111933827299",
+     *     "content": "{\"cardPrivateData\":{\"actionIds\":[\"agree\"],\"params\":{\"jobUUID\":\"44fbf32eb6228ec0c603a92c73193329\",\"jobParams\":\"{'inputParam':{'input':'深圳天气'}}\",\"title\":\"服务器已处理回调请求\",\"status\":\"agree\"}}}"
+     * }
      */
     @Override
     public void updateCard(DingCardCallbackData dingCardCallbackData) {
-        /**
-         * dingCardCallbackData示例：
-         * {
-         *     "type": "actionCallback",
-         *     "outTrackId": "202601210021",
-         *     "corpId": "dingf9e2225096a9207535c2f4657eb6378f",
-         *     "userId": "01054707111933827299",
-         *     "content": "{\"cardPrivateData\":{\"actionIds\":[\"agree\"],\"params\":{\"jobUUID\":\"44fbf32eb6228ec0c603a92c73193329\",\"jobParams\":\"{'inputParam':{'input':'深圳天气'}}\",\"title\":\"服务器已处理回调请求\",\"status\":\"agree\"}}}"
-         * }
-         */
+
         try {
             com.aliyun.dingtalkcard_1_0.Client client = DingServiceImpl.createCardClient();
             com.aliyun.dingtalkcard_1_0.models.UpdateCardHeaders updateCardHeaders = new com.aliyun.dingtalkcard_1_0.models.UpdateCardHeaders();
@@ -399,6 +392,17 @@ public class DingServiceImpl implements DingService {
      *
      * @param baseId
      * @param sheetId
+     * @param records
+     * records示例：
+     * [
+     *     {
+     *         "fields": {
+     *             "普通文本字段": "Hello Java World!!"
+     *         }
+     *     }
+     * ]
+     *
+     * @return
      */
     @Override
     public void addRecords(String baseId, String sheetId, List<InsertRecordsRequest.InsertRecordsRequestRecords> records) {
@@ -493,11 +497,102 @@ public class DingServiceImpl implements DingService {
     }
 
     /**
+     * 获取钉钉表格数据
+     * 获取记录列表(筛选)
+     *
+     * @param baseId
+     * @param sheetId
+     * @param filter
+     * filter示例：
+     * {
+     *     "combination": "and",
+     *     "conditions": [
+     *         {
+     *             "field": "jobUUID",
+     *             "operator": "equal",
+     *             "value": [
+     *                 "44fbf32eb6228ec0c603a92c73193329"
+     *             ]
+     *         }
+     *     ]
+     * }
+     * @return
+     */
+    @Override
+    public List<ListRecordsResponseBody.ListRecordsResponseBodyRecords> listAllRecordsByFilter(String baseId, String sheetId, ListRecordsRequest.ListRecordsRequestFilter filter) {
+
+        try {
+            com.aliyun.dingtalknotable_1_0.Client client = DingServiceImpl.createNoTableClient();
+            com.aliyun.dingtalknotable_1_0.models.ListRecordsHeaders listRecordsHeaders = new com.aliyun.dingtalknotable_1_0.models.ListRecordsHeaders();
+            listRecordsHeaders.xAcsDingtalkAccessToken = getAccessToken();
+            com.aliyun.dingtalknotable_1_0.models.ListRecordsRequest listRecordsRequest = new com.aliyun.dingtalknotable_1_0.models.ListRecordsRequest()
+                    .setOperatorId(appConfig.getDingUnionId())
+                    .setMaxResults(100)
+                    .setNextToken(null)
+                    .setFilter(filter);
+
+            ListRecordsResponse listRecordsResponse = client.listRecordsWithOptions(baseId, sheetId, listRecordsRequest, listRecordsHeaders, new RuntimeOptions());
+
+            List<ListRecordsResponseBody.ListRecordsResponseBodyRecords> records = listRecordsResponse.body.records;
+
+            Boolean hasMore = listRecordsResponse.body.hasMore;
+            String nextToken = listRecordsResponse.body.nextToken;
+            // 添加最大循环次数限制，防止无限循环
+            int maxIterations = 500;
+            int currentIteration = 0;
+            while (hasMore != null && hasMore && !StringTools.isEmpty(nextToken)) {
+                // 防止无限循环的安全检查
+                if (currentIteration >= maxIterations) {
+                    break;
+                }
+                listRecordsRequest.setNextToken(nextToken);
+                ListRecordsResponse listRestRecordsResponse = client.listRecordsWithOptions(baseId, sheetId, listRecordsRequest, listRecordsHeaders, new RuntimeOptions());
+                if (listRestRecordsResponse != null && listRestRecordsResponse.body != null) {
+                    if (listRestRecordsResponse.body.records != null) {
+                        records.addAll(listRestRecordsResponse.body.records);
+                    }
+                    hasMore = listRestRecordsResponse.body.hasMore;
+                    nextToken = listRestRecordsResponse.body.nextToken;
+                } else {
+                    // 如果响应为空，跳出循环
+                    break;
+                }
+                currentIteration++;
+            }
+            return records;
+
+        } catch (TeaException err) {
+            if (!com.aliyun.teautil.Common.empty(err.code) && !com.aliyun.teautil.Common.empty(err.message)) {
+                // err 中含有 code 和 message 属性，可帮助开发定位问题
+                logger.error(err.message);
+            }
+            return null;
+        } catch (Exception _err) {
+            TeaException err = new TeaException(_err.getMessage(), _err);
+            if (!com.aliyun.teautil.Common.empty(err.code) && !com.aliyun.teautil.Common.empty(err.message)) {
+                // err 中含有 code 和 message 属性，可帮助开发定位问题
+                logger.error(err.message);
+            }
+            return null;
+        }
+
+    }
+
+    /**
      * 更新表格数据
      *
      * @param baseId
      * @param sheetId
      * @param records0
+     * records0示例：
+     * {
+     *     "id": "yFZUtVk8Ar",
+     *     "fields": {
+     *         "语言": "Java"
+     *     }
+     * }
+     *
+     * @return
      */
     @Override
     public void updateRecord(String baseId, String sheetId, UpdateRecordsRequest.UpdateRecordsRequestRecords records0) {
