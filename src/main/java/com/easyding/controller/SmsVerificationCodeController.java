@@ -83,7 +83,7 @@ public class SmsVerificationCodeController extends ABaseController{
 	}
 
 	/**
-	 * 新增
+	 * 接收新验证码
 	 */
 	@RequestMapping("/receiveNewCode")
 	public ResponseVO receiveNewCode(@RequestBody SmsVerificationCode bean) {

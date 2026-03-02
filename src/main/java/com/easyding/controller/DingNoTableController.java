@@ -1,6 +1,7 @@
 package com.easyding.controller;
 
 import com.aliyun.dingtalknotable_1_0.models.InsertRecordsRequest;
+import com.aliyun.dingtalknotable_1_0.models.ListRecordsRequest;
 import com.aliyun.dingtalknotable_1_0.models.ListRecordsResponseBody;
 import com.aliyun.dingtalknotable_1_0.models.UpdateRecordsRequest;
 import com.easyding.entity.vo.ResponseVO;
@@ -53,6 +54,12 @@ public class DingNoTableController extends ABaseController {
     @RequestMapping("/listAllRecords")
     public ResponseVO listAllRecords(@RequestParam("baseId") String baseId, @RequestParam("sheetId") String sheetId) {
         List<ListRecordsResponseBody.ListRecordsResponseBodyRecords> records = dingService.listAllRecords(baseId, sheetId);
+        return getSuccessResponseVO(records);
+    }
+
+    @RequestMapping("/listAllRecordsByFilter")
+    public ResponseVO listAllRecordsByFilter(@RequestParam("baseId") String baseId, @RequestParam("sheetId") String sheetId, @RequestBody ListRecordsRequest.ListRecordsRequestFilter filter) {
+        List<ListRecordsResponseBody.ListRecordsResponseBodyRecords> records = dingService.listAllRecordsByFilter(baseId, sheetId, filter);
         return getSuccessResponseVO(records);
     }
 
