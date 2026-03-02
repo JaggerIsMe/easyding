@@ -372,7 +372,7 @@ public class DingServiceImpl implements DingService {
 
         // 3. 构建请求
         Request request = new Request.Builder()
-                .url(String.format("%s/v1/job/%s/1", appConfig.getIndeedApiUrl(), jobUUID))
+                .url(String.format("%s/v2/job/operation", appConfig.getIndeedApiUrl()))
                 .put(body)  // PUT 方法
                 .addHeader("appKey", appConfig.getIndeedAppKey())
                 .addHeader("appSecret", appConfig.getIndeedAppSecret())

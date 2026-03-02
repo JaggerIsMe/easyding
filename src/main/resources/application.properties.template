@@ -24,9 +24,12 @@ ding.cardCallbackRouteKey=callback_url_v1
 ding.mpBaseId=********
 ding.mpSheetId=********
 ding.hsSheetId=********
+ding.successCardTemplateId=********
+ding.failCardTemplateId=********
 
 indeed.commandJobAPIUrl=https://z-commander-api.ai-indeed.com/openAPI
 indeed.appKey=********
 indeed.appSecret=********
+indeed.notificationAheadHours=24
 
 task.cron.expression=0 0 1 * * ?
