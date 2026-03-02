@@ -265,7 +265,7 @@ public class JobRunResultNotificationInfoServiceImpl implements JobRunResultNoti
 
             List<ListRecordsResponseBody.ListRecordsResponseBodyRecords> records = dingService.listAllRecordsByFilter(appConfig.getDingMpBaseId(), appConfig.getDingMpSheetId(), filter);
             // 如果运行记录和unionId匹配 则发送通知
-            if (records.size() == 1) {
+            if (records != null && records.size() == 1) {
                 // 检查数据库job_run_result_notification_info表中是否存在该记录且已经发送过结果通知
                 JobRunResultNotificationInfoQuery jobRunResultNotificationInfoQuery = new JobRunResultNotificationInfoQuery();
                 jobRunResultNotificationInfoQuery.setJobUuid(jobRunResult.getJobUuid());
