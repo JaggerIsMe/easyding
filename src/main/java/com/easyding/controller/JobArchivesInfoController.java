@@ -1,17 +1,17 @@
 package com.easyding.controller;
 
-import java.util.List;
-
-import com.easyding.entity.query.JobArchivesInfoQuery;
 import com.easyding.entity.po.indeedPo.JobArchivesInfo;
+import com.easyding.entity.query.JobArchivesInfoQuery;
 import com.easyding.entity.vo.ResponseVO;
 import com.easyding.service.JobArchivesInfoService;
 import com.easyding.task.IndeedJobArchivesTask;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  *  Controller
@@ -102,6 +102,15 @@ public class JobArchivesInfoController extends ABaseController{
 	@RequestMapping("/executeIndeedJobArchivesTask")
 	public ResponseVO executeIndeedJobArchivesTask() {
 		indeedJobArchivesTask.execute();
+		return getSuccessResponseVO(null);
+	}
+
+	/**
+	 * 修复数据
+	 */
+	@RequestMapping("/fixJobArchives")
+	public ResponseVO fixJobArchives(@RequestParam("jobUUID") String jobUuid, @RequestParam("age") String age) {
+		jobArchivesInfoService.fixJobArchives(jobUuid, age);
 		return getSuccessResponseVO(null);
 	}
 }

@@ -74,4 +74,9 @@ public interface JobArchivesInfoService {
 	 */
 	void growJobArchivesAge();
 
+	/**
+	 * 修复数据
+	 */
+	void fixJobArchives(String jobUuid, String age);
+
 }
