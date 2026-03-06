@@ -261,4 +261,53 @@ public class JobArchivesInfoServiceImpl implements JobArchivesInfoService {
             }
         });
     }
+
+    /**
+     * 修复数据
+     *
+     * @param jobUuid
+     * @param age
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void fixJobArchives(String jobUuid, String age) {
+        JobRunHistoryInfoQuery queryTotalFailedCounts = new JobRunHistoryInfoQuery();
+        queryTotalFailedCounts.setJobUuid(jobUuid);
+        queryTotalFailedCounts.setStatus(IndeedJobStatusEnum.FAILED.getCode());
+        queryTotalFailedCounts.setAddFlag(1);
+        JobRunHistoryInfoQuery queryTotalStoppedCounts = new JobRunHistoryInfoQuery();
+        queryTotalStoppedCounts.setJobUuid(jobUuid);
+        queryTotalStoppedCounts.setStatus(IndeedJobStatusEnum.STOPPED.getCode());
+        queryTotalStoppedCounts.setAddFlag(1);
+        JobRunHistoryInfoQuery queryTotalSuccessCounts = new JobRunHistoryInfoQuery();
+        queryTotalSuccessCounts.setJobUuid(jobUuid);
+        queryTotalSuccessCounts.setStatus(IndeedJobStatusEnum.SUCCESS.getCode());
+        queryTotalSuccessCounts.setAddFlag(1);
+        queryTotalSuccessCounts.setStatus(IndeedJobStatusEnum.SUCCESS.getCode());
+        int totalFailedCounts = jobRunHistoryInfoService.findCountByParam(queryTotalFailedCounts);
+        int totalStoppedCounts = jobRunHistoryInfoService.findCountByParam(queryTotalStoppedCounts);
+        int totalSuccessCounts = jobRunHistoryInfoService.findCountByParam(queryTotalSuccessCounts);
+
+        AtomicInteger totalRunTimeInSecond = new AtomicInteger(0);
+        JobRunHistoryInfoQuery addedJobRunHistoryQuery = new JobRunHistoryInfoQuery();
+        addedJobRunHistoryQuery.setJobUuid(jobUuid);
+        addedJobRunHistoryQuery.setAddFlag(1);
+        List<JobRunHistoryInfo> listJobRunHistoryInfo = jobRunHistoryInfoService.findListByParam(addedJobRunHistoryQuery);
+        listJobRunHistoryInfo.forEach(jobRunHistoryInfo -> {
+            if (jobRunHistoryInfo.getStatus() != 1 && jobRunHistoryInfo.getStatus() != 2 && jobRunHistoryInfo.getRunTime() != null) {
+                totalRunTimeInSecond.addAndGet(jobRunHistoryInfo.getRunTime());
+            }
+        });
+        BigDecimal totalRunTimeInHour = BigDecimal.valueOf(totalRunTimeInSecond.get() / 3600.0D);
+
+        JobArchivesInfo fixedJobArchivesInfo = new JobArchivesInfo();
+        fixedJobArchivesInfo.setJobUuid(jobUuid);
+        fixedJobArchivesInfo.setAge(age);
+        fixedJobArchivesInfo.setTotalRunTime(totalRunTimeInHour);
+        fixedJobArchivesInfo.setTotalCounts(totalFailedCounts + totalStoppedCounts + totalSuccessCounts);
+        fixedJobArchivesInfo.setTotalFailCounts(totalFailedCounts);
+        fixedJobArchivesInfo.setTotalSuccessCounts(totalSuccessCounts);
+
+        this.updateJobArchivesInfoByJobUuidAndAge(fixedJobArchivesInfo, jobUuid, age);
+    }
 }
