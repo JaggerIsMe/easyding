@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -214,8 +215,8 @@ public class JobRunResultNotificationInfoServiceImpl implements JobRunResultNoti
      * @param openConversationID
      */
     @Override
+    @Async("notificationExecutor")
     public void sendJobExecuteResultNotification(String unionID, String openConversationID) {
-
         // 获取当前时间
         LocalDateTime now = LocalDateTime.now();
         // 获取指定小时前的时间
@@ -310,9 +311,6 @@ public class JobRunResultNotificationInfoServiceImpl implements JobRunResultNoti
                     this.addOrUpdateBatch(Collections.singletonList(jobRunResult));
                 }
             }
-
         });
-
     }
-
 }
